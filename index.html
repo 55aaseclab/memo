@@ -288,7 +288,7 @@ function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome()
   header(fl.title,true);
   main.innerHTML=`<div class="seg">`+fl.variants.map(v=>`<button class="segbtn ${v.id===curVid?"on":""}" onclick="pickVid('${v.id}')">${v.name}</button>`).join("")+`</div>
   <div class="card">`+cv.steps.map((st,i)=>`<div class="step" style="cursor:default"><div class="n">${i+1}</div><div class="txt">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}${st.why?`<div class="why">${esc(st.why)}</div>`:""}</div></div>`).join("")+`</div>
-  <button class="btn primary" style="width:100%" onclick="startFlow('${fid}')">▶ 开始煮面</button>
+  <button class="btn primary" style="width:100%" onclick="startFlow('${fid}')">▶ 开始${fl.title}</button>
   <div class="privacy">到点响铃 · 中途离开会挂起，回来接着走</div>`;
   extra.innerHTML="";return}
  renderFlowRun(fl)}
@@ -316,7 +316,7 @@ function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const runn
      `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">✓ 完成</button>`)+`</div>`}}
   else if(browsing&&i===viewIdx){list+=`<div class="fstep view" id="step-${i}" onclick="backCur()"><div class="fhead"><div class="n">${i+1}</div><div class="ft">${esc(st.t)}</div><div class="fd">查看中 ×</div></div><div class="meta">${st.dur?"建议 "+mmss(st.dur)+" · ":""}${esc(st.why||"　")}</div><div class="nowmini">⏱ 当前在第 ${FS.idx+1} 步 · ${remainTxt} — 点此回到当前</div></div>`}
   else{list+=row(st,i,i<FS.idx?"done":"fut")+`</div>`}}
- main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+
+ main.innerHTML=(stale?`<div class="banner warn">上次进行到一半，时间过得有点久，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+
  `<div class="flist">`+list+`</div>
  <div class="grid3" style="margin-top:12px"><button class="btn ghost" onclick="navPrev()" ${viewIdx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><button class="btn ghost" onclick="${browsing?"backCur()":"noop()"}" style="${browsing?"":"opacity:.55;pointer-events:none"}">${browsing?"回到当前":"📍 当前"}</button><button class="btn ghost" onclick="navNext()" ${viewIdx>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button></div>
  <button class="btn ghost" style="width:100%;margin-top:10px" onclick="abortFlow()">放弃本次</button>`;
