@@ -76,6 +76,18 @@ h2{font-size:18px;margin:2px 0 4px}
 .empty{text-align:center;color:var(--t3);padding:40px 0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + var(--safe-b));background:rgba(31,35,41,.92);color:#fff;padding:9px 16px;border-radius:10px;font-size:13px;z-index:60;max-width:80vw}
 input.snap{display:none}
+.seg{display:flex;gap:8px;margin-bottom:12px}
+.segbtn{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 0;font-size:14px;font-weight:600;color:var(--t2);cursor:pointer}
+.segbtn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.dur{color:var(--brand);font-weight:600}
+.cd{font-size:44px;font-weight:700;color:var(--t1);text-align:center;margin:8px 0;font-variant-numeric:tabular-nums}
+.cd.paused{color:#915930;font-size:24px}
+.cd.manual{color:var(--t2);font-size:20px}
+.step.done .n{background:var(--green-soft);color:var(--green)}
+.step.cur{background:#eef1fb;margin:0 -14px;padding:10px 14px}
+.step.cur .n{background:var(--brand);color:#fff}
+.banner.run{background:#e8f0fe;border-color:#c3d0f5;color:#2a4bb3;cursor:pointer}
+.banner.run button{display:none}
 </style>
 </head>
 <body>
@@ -126,18 +138,28 @@ const SCENES=[
  {t:"提前一站起身到后门",ph:false,why:""},
  {t:"回头看座位、脚下、窗沿",ph:false,why:"手机和雨伞是公交遗失物前两名"},
  {t:"确认刷卡扣费成功",ph:false,why:"异常扣费当场截图，事后难举证"},
- {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]},
-{id:"noodle-in",cat:"🍜 煮面",em:"💧",title:"下锅前 30 秒",sub:"备好节奏，面不糊锅",items:[
- {t:"水开再下面，别冷水下锅",ph:false,why:"冷水下锅外层糊化粘底"},
- {t:"水里加一小撮盐",ph:false,why:"防粘，还能给面入底味"},
- {t:"碗、酱料、浇头先摆好",ph:false,why:"出锅节奏快，现找必手忙"},
- {t:"点火后人不离开灶台",ph:false,why:"扑锅和烧干都在一分钟内发生"}]},
-{id:"noodle-out",cat:"🍜 煮面",em:"🔥",title:"关火前 10 秒",sub:"面熟了，火必须死",items:[
- {t:"夹一根尝，芯不硬就到火候",ph:false,why:"余温还会继续加热，宁可欠一点"},
- {t:"防扑锅：转小火或加半碗冷水",ph:false,why:"溢锅浇灭火苗是燃气灶最险一幕"},
- {t:"关火后看一眼火苗确实熄灭",ph:false,why:"忘关火是厨房第一大事故源"},
- {t:"湿抹布垫手端锅，慢倒别溅",ph:false,why:""}]}
+ {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]}
 ];
+const FLOWS=[
+ {id:"noodle",cat:"🍳 烹饪",em:"🍜",title:"煮面",sub:"跟时间线走，到点叫你",
+  variants:[
+   {id:"instant",name:"方便面",steps:[
+    {t:"烧水",dur:180,why:"大火全开，盖盖更快"},
+    {t:"下面饼 + 调料包",dur:0,why:"水全沸再下，面汤不浑"},
+    {t:"煮面",dur:180,why:"中途搅一次防粘"},
+    {t:"关火出锅",dur:0,why:"看一眼火苗确实熄灭"}]},
+   {id:"dried",name:"挂面",steps:[
+    {t:"烧水",dur:240,why:""},
+    {t:"水开下面 + 一撮盐",dur:0,why:"防粘，入底味"},
+    {t:"煮面",dur:360,why:"中途点一次冷水不糊"},
+    {t:"关火焖 30 秒",dur:30,why:"余温焖透面芯"},
+    {t:"出锅",dur:0,why:"看一眼火苗确实熄灭"}]},
+   {id:"thin",name:"龙须面",steps:[
+    {t:"烧水",dur:240,why:""},
+    {t:"下面",dur:0,why:""},
+    {t:"煮 90 秒",dur:90,why:"细面易熟，宁欠勿过"},
+    {t:"关火出锅",dur:0,why:"看一眼火苗确实熄灭"}]}
+  ]}];
 const INCIDENTS=[
 {id:"deposit",em:"💰",t:"押金被乱扣",cat:["hotel-out","car-out","car-in"],steps:[
  "当场不签字、不争吵，要求对方出具书面扣款依据（项目+金额+依据条款）",
@@ -177,24 +199,82 @@ function toast(msg){let t=$(".toast");if(!t){t=document.createElement("div");t.c
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function nav(h){location.hash=h}
 function route(){const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
- if(p==="")renderHome();else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
+ if(p!=="f"){clearInterval(flowTimer);flowTimer=null}
+ if(p==="")renderHome();else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
 function header(title,back,sub){hd.innerHTML=(back?'<button class="back" onclick="history.back()">‹</button>':"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(isStandalone?'<button class="ref" title="刷新" onclick="doRefresh(event)">⟳</button>':"")}
 document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("./sw.js").catch(()=>{})}});
 function banner(){if(isStandalone)return"";if(isWeChat)return'<div class="banner warn">ⓘ 微信内打开功能受限：点右上角 ··· 选择「在浏览器中打开」体验完整功能</div>';if(isIOS&&getPref("a2hsHide")&&Date.now()-getPref("a2hsHide")<7*864e5)return"";return `<div class="banner">📤 iPhone：分享按钮 → 添加到主屏幕，关键时刻 1 秒打开<button onclick="hideA2hs()">×</button></div>`}
 function hideA2hs(){setPref("a2hsHide",Date.now());route()}
 window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
 window.hideA2hs=hideA2hs;
-const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"noodle",label:"🍜 煮面",name:"煮面"}];
+const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
+const LS_FLOW="memo.flow.v1";
+const getFlow=()=>{try{return JSON.parse(localStorage.getItem(LS_FLOW)||"null")}catch(e){return null}};
+const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
+let FS=null,flowTimer=null,audioCtx=null,curVid=null,lastFlow=null;
+const mmss=s=>{s=Math.max(0,s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<3;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=880;g.gain.value=.18;const t=audioCtx.currentTime+i*.45;o.start(t);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.stop(t+.4)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
+function sceneTitle(id){const s=SCENES.find(x=>x.id===id);if(s)return s.title;
+ const m=/^flow-(.+?)-(.+)$/.exec(id);if(m){const fl=FLOWS.find(x=>x.id===m[1]);const v=fl&&fl.variants.find(v=>v.id===m[2]);if(fl)return fl.title+" · "+(v?v.name:"")}
+ return id}
 function renderHome(){header("Memo","",'关键时刻留证');
- const recs=getRecs();
- main.innerHTML=banner()+`<div class="grid big">`+CATS.map(c=>{const n=SCENES.filter(s=>s.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${c.id}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>"+
+ const recs=getRecs();const f=getFlow();let fb="";
+ if(f){const fl=FLOWS.find(x=>x.id===f.fid);const v=fl&&fl.variants.find(v=>v.id===f.vid);let rem="";
+  if(f.paused)rem="已暂停";else if(f.endTs){const s=Math.round((f.endTs-Date.now())/1000);rem=s>0?"剩 "+mmss(s):(Date.now()-f.endTs>18e5?"已超时":"时间到")}else rem="进行中";
+  fb=`<div class="banner run" onclick="nav('#/f/${f.fid}')">🍳 ${fl?fl.title:"流程"}（${v?v.name:""}）${rem} · 点继续 →<button onclick="event.stopPropagation()">▶</button></div>`}
+ main.innerHTML=banner()+fb+`<div class="grid big">`+CATS.map(c=>{const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${c.id}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>"+
  `<div class="privacy">🔒 数据仅保存在本机，不上传任何服务器</div>`;
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
 window.nav=nav;
 function renderCat(id){const c=CATS.find(x=>x.id===id);if(!c){renderHome();return}
  header(c.name,true);
- main.innerHTML=`<div class="grid">`+SCENES.filter(s=>s.cat===c.label).map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>";
+ const flows=FLOWS.filter(x=>x.cat===c.label),scenes=SCENES.filter(s=>s.cat===c.label);
+ main.innerHTML=`<div class="grid">`+flows.map(x=>`<div class="tile" onclick="nav('#/f/${x.id}')"><div class="em">${x.em}</div><div class="t">${esc(x.title)}</div><div class="s">⏱ 定时流程 · ${esc(x.sub)}</div></div>`).join("")+scenes.map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>";
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案</button></div>`}
+function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome();return}
+ FS=getFlow();if(FS&&FS.fid!==fid)FS=null;
+ if(!FS){if(!curVid)curVid=fl.variants[0].id;
+  header(fl.title,true);
+  main.innerHTML=`<div class="seg">`+fl.variants.map(v=>`<button class="segbtn ${v.id===curVid?"on":""}" onclick="pickVid('${v.id}')">${v.name}</button>`).join("")+`</div>
+  <div class="card">`+fl.variants.find(v=>v.id===curVid).steps.map((st,i)=>`<div class="step"><div class="n">${i+1}</div><div>${esc(st.t)}${st.dur?` <b class="dur">⏱ ${mmss(st.dur)}</b>`:""}${st.why?`<div class="why">${esc(st.why)}</div>`:""}</div></div>`).join("")+`</div>
+  <button class="btn primary" style="width:100%" onclick="startFlow('${fid}')">▶ 开始计时</button>
+  <div class="privacy">到点响铃 · 离开页面会挂起，回来接着走</div>`;
+  extra.innerHTML="";return}
+ renderFlowRun(fl)}
+window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
+function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const stale=FS.endTs&&!FS.paused&&FS.endTs<Date.now()-18e5;
+ header(fl.title+" · "+v.name,true);
+ const cur=v.steps[FS.idx];
+ main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+
+ `<div class="card"><h2>${esc(cur.t)}</h2>`+(cur.dur&&!FS.paused?`<div class="cd" id="cd">--:--</div>`:cur.dur?`<div class="cd paused">已暂停</div>`:`<div class="cd manual">完成后点 ✓</div>`)+`<div class="meta">${cur.why?esc(cur.why):"　"}</div></div>
+ <div class="grid">
+ ${FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button>`:`<button class="btn primary" onclick="stepDone(false)">✓ 完成这步</button>`}
+ <button class="btn ghost" onclick="stepDone(false)">⏭ 跳过</button></div>
+ <div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx?"cur":""}"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}</div></div>`).join("")+`</div>
+ <button class="btn ghost" style="width:100%" onclick="abortFlow()">放弃本次</button>`;
+ extra.innerHTML="";clearInterval(flowTimer);if(!FS.paused)flowTimer=setInterval(tick,500);tick()}
+window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.find(x=>x.id===curVid);
+ if(getFlow()&&!confirm("放弃上一次未完成的流程？"))return;
+ FS={fid:fid,vid:v.id,idx:0,endTs:v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null,paused:false,remain:0,startedTs:Date.now()};
+ setFlow(FS);renderFlowRun(fl)};
+window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
+window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;FS.paused=false;const v=fl.variants.find(x=>x.id===FS.vid);FS.endTs=v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null;setFlow(FS);renderFlowRun(fl)};
+window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);nav("#/")};
+window.stepDone=auto=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
+ if(auto)beep();lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
+ FS.idx++;if(FS.idx>=v.steps.length){finishFlow();return}
+ const st=v.steps[FS.idx];FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;FS.paused=false;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
+function finishFlow(){clearInterval(flowTimer);setFlow(null);
+ header("完成 ✅",true);
+ main.innerHTML=`<div class="card" style="text-align:center;padding:30px 14px"><div style="font-size:40px">🍜</div><h2>${esc(lastFlow.title)} 完成</h2><div class="meta">${fmt(lastFlow.ts)} 开始 · 共 ${lastFlow.items.length} 步</div></div>
+ <button class="btn primary" style="width:100%" onclick="saveFlowRec()">📁 存为凭证</button>
+ <button class="btn ghost" style="width:100%;margin-top:10px" onclick="nav('#/')">不用了，回首页</button>`;
+ extra.innerHTML=""}
+window.saveFlowRec=()=>{const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),ts:lastFlow.ts,items:lastFlow.items};
+ if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)};
+function tick(){if(!FS||FS.paused)return;const el=$("#cd");if(el&&FS.endTs){const s=Math.round((FS.endTs-Date.now())/1000);el.textContent=mmss(s);if(s<=0)stepDone(true)}}
 let curCard=null,curState=null;
 function renderCard(id){const s=SCENES.find(x=>x.id===id);if(!s){renderHome();return}
  curCard=s;curState=s.items.map(i=>({done:false,photo:null}));
@@ -220,22 +300,21 @@ window.finishCard=()=>{const done=curState.filter(i=>i.done).length;if(!done){to
  if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)};
 function renderRecords(){header("我的档案",true);
  const recs=getRecs();
- main.innerHTML=recs.length?recs.map(r=>{const s=SCENES.find(x=>x.id===r.sceneId)||{};const n=r.items.filter(i=>i.photo).length;
- return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">${s.em||"📄"}</div><div style="flex:1"><div class="t">${esc(s.title||r.sceneId)}</div><div class="m">${fmt(r.ts)} · 照片 ${n} 张</div></div><div style="color:var(--t3)">›</div></div>`}).join(""):`<div class="empty">还没有凭证<br>去首页开始第一张时刻卡吧</div><button class="btn primary" style="width:100%" onclick="nav('#/')">去首页</button>`;
+ main.innerHTML=recs.length?recs.map(r=>{const n=r.items.filter(i=>i.photo).length;
+ return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">📄</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${fmt(r.ts)} · 照片 ${n} 张</div></div><div style="color:var(--t3)">›</div></div>`}).join(""):`<div class="empty">还没有凭证<br>去首页开始第一张时刻卡吧</div><button class="btn primary" style="width:100%" onclick="nav('#/')">去首页</button>`;
  extra.innerHTML=""}
 function renderRecord(id){const r=getRecs().find(x=>x.id===id);if(!r){renderRecords();return}
- const s=SCENES.find(x=>x.id===r.sceneId)||{};
  header("凭证详情",true);
  const photos=r.items.filter(i=>i.photo);
- main.innerHTML=`<div class="card"><h2>${s.em||""} ${esc(s.title||r.sceneId)}</h2><div class="meta">生成于 ${fmt(r.ts)}</div>
+ main.innerHTML=`<div class="card"><h2>${esc(sceneTitle(r.sceneId))}</h2><div class="meta">生成于 ${fmt(r.ts)}</div>
  ${r.items.map(i=>`<div class="item ${i.done?"done":""}" style="cursor:default"><div class="cb">${i.done?"✓":""}</div><div class="txt">${esc(i.t)}${i.photo?`<div class="why">📷 已留证</div>`:""}</div></div>`).join("")}</div>
  ${photos.length?`<div class="card"><div class="meta">照片（带时间水印）</div><div class="photogrid">${photos.map(i=>`<img src="${i.photo}" onclick="lb(this.src)">`).join("")}</div></div>`:""}
  <button class="btn primary" style="width:100%" onclick="copyRec('${r.id}')">📋 复制为文本</button>
  <button class="btn ghost" style="width:100%;margin-top:10px" onclick="delRec('${r.id}')">🗑 删除此凭证</button>`;
  extra.innerHTML=""}
 window.lb=src=>{extra.insertAdjacentHTML("beforeend",`<div class="lightbox" onclick="this.remove()"><img src="${src}"></div>`)};
-window.copyRec=id=>{const r=getRecs().find(x=>x.id===id);if(!r)return;const s=SCENES.find(x=>x.id===r.sceneId)||{};
- const txt=`Memo 凭证\n场景：${s.title||r.sceneId}\n时间：${fmt(r.ts)}\n清单：\n${r.items.map(i=>(i.done?"✅ ":"☐ ")+i.t).join("\n")}\n照片：${r.items.filter(i=>i.photo).length} 张（带时间水印，见本机档案）`;
+window.copyRec=id=>{const r=getRecs().find(x=>x.id===id);if(!r)return;
+ const txt=`Memo 凭证\n场景：${sceneTitle(r.sceneId)}\n时间：${fmt(r.ts)}\n清单：\n${r.items.map(i=>(i.done?"✅ ":"☐ ")+i.t).join("\n")}\n照片：${r.items.filter(i=>i.photo).length} 张（带时间水印，见本机档案）`;
  const ok=()=>toast("已复制，可直接粘贴到申诉/聊天");
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,()=>fallbackCopy(txt,ok))}else fallbackCopy(txt,ok)};
 function fallbackCopy(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){toast("复制失败，请手动截屏")}ta.remove()}
@@ -247,7 +326,7 @@ function renderSos(id){const x=INCIDENTS.find(i=>i.id===id);if(!x){renderSosHome
  header(x.t,true);
  const recs=getRecs().filter(r=>x.cat.includes(r.sceneId));
  main.innerHTML=`<div class="card">${x.steps.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${esc(s)}</div></div>`).join("")}</div>
- ${recs.length?`<div class="cat">相关凭证</div>${recs.map(r=>{const s=SCENES.find(y=>y.id===r.sceneId)||{};return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">${s.em||"📄"}</div><div style="flex:1"><div class="t">${esc(s.title||r.sceneId)}</div><div class="m">${fmt(r.ts)}</div></div><div style="color:var(--t3)">›</div></div>`}).join("")}`:`<div class="card" style="color:var(--t3);font-size:13px">本次没有留证。按上面步骤走，以后入场时先开一张时刻卡。</div>`}`;
+ ${recs.length?`<div class="cat">相关凭证</div>${recs.map(r=>{return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">📄</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${fmt(r.ts)}</div></div><div style="color:var(--t3)">›</div></div>`}).join("")}`:`<div class="card" style="color:var(--t3);font-size:13px">本次没有留证。按上面步骤走，以后入场时先开一张时刻卡。</div>`}`;
  extra.innerHTML=""}
 window.addEventListener("hashchange",route);
 route();
