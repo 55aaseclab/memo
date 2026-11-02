@@ -104,10 +104,20 @@ const SCENES=[
  {t:"核对车牌、车型、司机人脸",ph:false,why:"人车不符直接取消，坐了更麻烦"},
  {t:"行程分享给家人",ph:false,why:"平台一键分享，别嫌麻烦"},
  {t:"坐后排",ph:false,why:""}]},
-{id:"taxi-out",cat:"🚕 打车",em:"👋",title:"下车前 3 秒",sub:"过了这秒，东西就没了",items:[
+ {id:"taxi-out",cat:"🚕 打车",em:"👋",title:"下车前 3 秒",sub:"过了这秒，东西就没了",items:[
  {t:"回头看后座、脚下、缝隙",ph:false,why:"打车遗失物最高发就是这 3 秒"},
  {t:"核对计费再下车",ph:false,why:""},
- {t:"索要/保存电子行程单",ph:true,why:"报销+遗失找回+纠纷的全用得上"}]}
+ {t:"索要/保存电子行程单",ph:true,why:"报销+遗失找回+纠纷的全用得上"}]},
+{id:"bus-in",cat:"🚌 公交",em:"🚏",title:"上车 10 秒",sub:"方向、钱码、背包三件事",items:[
+ {t:"看清车头终点站再上，别坐反方向",ph:false,why:"反方向一坐就是半小时"},
+ {t:"付款码/交通卡提前调出",ph:false,why:"别堵在门口翻手机"},
+ {t:"背包转到身前，手机放内袋",ph:false,why:"高峰时段扒窃高发"},
+ {t:"拍下车牌或车身编号",ph:true,why:"公交没有实名行程，车牌+时间是失物找回的唯一线索"}]},
+{id:"bus-out",cat:"🚌 公交",em:"🚉",title:"下车前 3 秒",sub:"别坐过站，别落东西",items:[
+ {t:"提前一站起身到后门",ph:false,why:""},
+ {t:"回头看座位、脚下、窗沿",ph:false,why:"手机和雨伞是公交遗失物前两名"},
+ {t:"确认刷卡扣费成功",ph:false,why:"异常扣费当场截图，事后难举证"},
+ {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]}
 ];
 const INCIDENTS=[
 {id:"deposit",em:"💰",t:"押金被乱扣",cat:["hotel-out","car-out","car-in"],steps:[
@@ -115,9 +125,10 @@ const INCIDENTS=[
  "打开 Memo 档案，调出对应的提车/入住/退房凭证照片",
  "平台订单页发起申诉，上传凭证；住宿类可同时打 12315 或当地 12345",
  "全程沟通记录截图存档，别删任何原始照片"]},
-{id:"lost",em:"🔦",t:"东西落下了",cat:["taxi-out","hotel-out"],steps:[
+{id:"lost",em:"🔦",t:"东西落下了",cat:["taxi-out","hotel-out","bus-out"],steps:[
  "先回想最后见到物品的场景（车/房间）",
  "打车：打开平台行程单 → 联系司机或平台挂失；行程单在 Memo 档案里",
+ "公交：记下线路+车牌（Memo 凭证里有照片）→ 打车队电话或 12345 公交失物登记",
  "酒店：先打前台，再查订单平台客服；描述柜位可加快查找",
  "贵重证件丢失：同步挂失补办，别等"]},
 {id:"damage",em:"🚗",t:"车损争议",cat:["car-in","car-out"],steps:[
@@ -155,7 +166,7 @@ window.hideA2hs=hideA2hs;
 function renderHome(){header("Memo","",'关键时刻留证');
  const recs=getRecs();
  main.innerHTML=banner()+
- ["🏨 住店","🚗 租车","🚕 打车"].map(cat=>`<div class="cat">${cat}</div><div class="grid">`+SCENES.filter(s=>s.cat===cat).map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>").join("")+
+ ["🏨 住店","🚗 租车","🚕 打车","🚌 公交"].map(cat=>`<div class="cat">${cat}</div><div class="grid">`+SCENES.filter(s=>s.cat===cat).map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>").join("")+
  `<div class="privacy">🔒 数据仅保存在本机，不上传任何服务器</div>`;
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
 window.nav=nav;
