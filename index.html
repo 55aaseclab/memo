@@ -284,7 +284,7 @@ function renderCat(id){const c=CATS.find(x=>x.id===id);if(!c){renderHome();retur
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案</button></div>`}
 function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome();return}
  FS=getFlow();if(FS&&FS.fid!==fid)FS=null;
- if(!FS){if(!curVid||!fl.variants.find(v=>v.id===curVid))curVid=fl.variants[0].id;const cv=fl.variants.find(v=>v.id===curVid);
+ if(!FS){if(!curVid){curVid=getPref("fv_"+fid)||fl.variants[0].id}if(!fl.variants.find(v=>v.id===curVid))curVid=fl.variants[0].id;const cv=fl.variants.find(v=>v.id===curVid);
   header(fl.title,true);
   main.innerHTML=`<div class="seg">`+fl.variants.map(v=>`<button class="segbtn ${v.id===curVid?"on":""}" onclick="pickVid('${v.id}')">${v.name}</button>`).join("")+`</div>
   <div class="card">`+cv.steps.map((st,i)=>`<div class="step" style="cursor:default"><div class="n">${i+1}</div><div class="txt">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}${st.why?`<div class="why">${esc(st.why)}</div>`:""}</div></div>`).join("")+`</div>
@@ -292,7 +292,7 @@ function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome()
   <div class="privacy">到点响铃 · 中途离开会挂起，回来接着走</div>`;
   extra.innerHTML="";return}
  renderFlowRun(fl)}
-window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
+window.pickVid=id=>{const fid=location.hash.slice(2).split("/")[1];curVid=id;setPref("fv_"+fid,id);renderFlow(fid)};
 function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const running=FS.run&&FS.endTs;const stale=running&&!FS.paused&&FS.endTs<Date.now()-18e5;
  const cur=v.steps[FS.idx];const expired=running&&!FS.paused&&Date.now()>=FS.endTs;
  if(expired)FV=null;
@@ -334,7 +334,7 @@ window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.fi
  if(getFlow()&&!confirm("放弃上一次未完成的流程？"))return;
  FS={fid:fid,vid:v.id,idx:0,run:false,endTs:null,paused:false,remain:0,startedTs:Date.now()};
  FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
-window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
+window.pickVid=id=>{const fid=location.hash.slice(2).split("/")[1];curVid=id;setPref("fv_"+fid,id);renderFlow(fid)};
 window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
