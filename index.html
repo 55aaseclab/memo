@@ -30,6 +30,9 @@ main{flex:1;padding:14px 14px calc(88px + var(--safe-b))}
 .banner.warn{background:#fdecec;border-color:#f5c2c2;color:#8f2326}
 .cat{margin:16px 2px 8px;font-size:13px;color:var(--t2);font-weight:600}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:8px}
+.card.ring{border-color:var(--red);background:var(--red-soft);animation:ringblink 1s ease-in-out infinite}
+@keyframes ringblink{50%{background:#fbd5d7}}
 .grid.big{gap:12px;margin-top:4px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;transition:transform .06s}
 .tile.big{padding:26px 16px;border-radius:16px}
@@ -80,7 +83,7 @@ input.snap{display:none}
 .segbtn{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 0;font-size:14px;font-weight:600;color:var(--t2);cursor:pointer}
 .segbtn.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .dur{color:var(--brand);font-weight:600}
-.cd{font-size:44px;font-weight:700;color:var(--t1);text-align:center;margin:8px 0;font-variant-numeric:tabular-nums}
+.cd{font-size:64px;font-weight:800;color:var(--t1);text-align:center;margin:10px 0;font-variant-numeric:tabular-nums}
 .cd.paused{color:#915930;font-size:24px}
 .cd.manual{color:var(--t2);font-size:20px}
 .step.done .n{background:var(--green-soft);color:var(--green)}
@@ -199,7 +202,7 @@ function toast(msg){let t=$(".toast");if(!t){t=document.createElement("div");t.c
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function nav(h){location.hash=h}
 function route(){const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
- if(p!=="f"){clearInterval(flowTimer);flowTimer=null}
+ if(p!=="f"){clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();setTitle("Memo · 关键时刻留证")}
  if(p==="")renderHome();else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
 function header(title,back,sub){hd.innerHTML=(back?'<button class="back" onclick="history.back()">‹</button>':"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(isStandalone?'<button class="ref" title="刷新" onclick="doRefresh(event)">⟳</button>':"")}
 document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("./sw.js").catch(()=>{})}});
@@ -211,9 +214,14 @@ const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗
 const LS_FLOW="memo.flow.v1";
 const getFlow=()=>{try{return JSON.parse(localStorage.getItem(LS_FLOW)||"null")}catch(e){return null}};
 const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
-let FS=null,flowTimer=null,audioCtx=null,curVid=null,lastFlow=null;
+let FS=null,flowTimer=null,ringTimer=null,wakeLock=null,audioCtx=null,curVid=null,lastFlow=null;
 const mmss=s=>{s=Math.max(0,s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
 function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<3;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=880;g.gain.value=.18;const t=audioCtx.currentTime+i*.45;o.start(t);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.stop(t+.4)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
+function startRing(){if(ringTimer)return;beep();ringTimer=setInterval(beep,2000)}
+function stopRing(){clearInterval(ringTimer);ringTimer=null}
+function lockScreen(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>wakeLock=l).catch(()=>{})}catch(e){}}
+function unlockScreen(){try{wakeLock&&wakeLock.release();wakeLock=null}catch(e){}}
+function setTitle(t){document.title=t}
 function sceneTitle(id){const s=SCENES.find(x=>x.id===id);if(s)return s.title;
  const m=/^flow-(.+?)-(.+)$/.exec(id);if(m){const fl=FLOWS.find(x=>x.id===m[1]);const v=fl&&fl.variants.find(v=>v.id===m[2]);if(fl)return fl.title+" · "+(v?v.name:"")}
  return id}
@@ -243,16 +251,28 @@ function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome()
  renderFlowRun(fl)}
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const stale=FS.endTs&&!FS.paused&&FS.endTs<Date.now()-18e5;
+ const cur=v.steps[FS.idx];const expired=FS.endTs&&!FS.paused&&Date.now()>=FS.endTs;
  header(fl.title+" · "+v.name,true);
- const cur=v.steps[FS.idx];
- main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+
- `<div class="card"><h2>${esc(cur.t)}</h2>`+(cur.dur&&!FS.paused?`<div class="cd" id="cd">--:--</div>`:cur.dur?`<div class="cd paused">已暂停</div>`:`<div class="cd manual">完成后点 ✓</div>`)+`<div class="meta">${cur.why?esc(cur.why):"　"}</div></div>
- <div class="grid">
- ${FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button>`:`<button class="btn primary" onclick="stepDone(false)">✓ 完成这步</button>`}
- <button class="btn ghost" onclick="stepDone(false)">⏭ 跳过</button></div>
- <div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx?"cur":""}"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}</div></div>`).join("")+`</div>
+ if(expired)startRing();else stopRing();
+ if(!FS.paused&&!expired)lockScreen();else unlockScreen();
+ let body,controls;
+ if(expired){body=`<div class="card ring"><div style="font-size:44px">⏰</div><h2>时间到！</h2><div class="meta">${esc(cur.t)}${cur.why?" — "+esc(cur.why):""}</div></div>
+  <button class="btn primary" style="width:100%" onclick="nextFlow()">${FS.idx>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button>`;
+  controls=`<button class="btn ghost" onclick="prevFlow()">◀ 上一步</button><span></span><span></span>`}
+ else{body=`<div class="card"><h2>${esc(cur.t)}</h2>`+(cur.dur&&!FS.paused?`<div class="cd" id="cd">--:--</div>`:cur.dur?`<div class="cd paused">已暂停</div>`:`<div class="cd manual">完成后点 ✓</div>`)+`<div class="meta">${cur.why?esc(cur.why):"　"}</div></div>`;
+  const mid=FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button>`:`<button class="btn primary" onclick="nextFlow()">✓ 完成</button>`;
+  const prev=FS.idx>0?`<button class="btn ghost" onclick="prevFlow()">◀ 上一步</button>`:`<span></span>`;
+  const next=FS.idx>=v.steps.length-1?`<button class="btn primary" onclick="nextFlow()">✅ 完成</button>`:`<button class="btn ghost" onclick="nextFlow()">下一步 ▶</button>`;
+  controls=prev+mid+next}
+ main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+body+
+ `<div class="grid3">${controls}</div>
+ <div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx&&!expired?"cur":""}"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}</div></div>`).join("")+`</div>
  <button class="btn ghost" style="width:100%" onclick="abortFlow()">放弃本次</button>`;
- extra.innerHTML="";clearInterval(flowTimer);if(!FS.paused)flowTimer=setInterval(tick,500);tick()}
+ extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick()}
+window.prevFlow=()=>{if(!FS||FS.idx===0)return;stopRing();FS.idx--;armStep();renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.nextFlow=()=>{if(!FS)return;stopRing();stepDone()};
+function armStep(){const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
+ FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;setFlow(FS)}
 window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.find(x=>x.id===curVid);
  if(getFlow()&&!confirm("放弃上一次未完成的流程？"))return;
  FS={fid:fid,vid:v.id,idx:0,endTs:v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null,paused:false,remain:0,startedTs:Date.now()};
@@ -260,13 +280,13 @@ window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.fi
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;FS.paused=false;const v=fl.variants.find(x=>x.id===FS.vid);FS.endTs=v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null;setFlow(FS);renderFlowRun(fl)};
-window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);nav("#/")};
-window.stepDone=auto=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
- if(auto)beep();lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
+window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();armStep();renderFlowRun(fl)};
+window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");nav("#/")};
+window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
+ lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
  FS.idx++;if(FS.idx>=v.steps.length){finishFlow();return}
- const st=v.steps[FS.idx];FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;FS.paused=false;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
-function finishFlow(){clearInterval(flowTimer);setFlow(null);
+ armStep();renderFlowRun(fl)};
+function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");setFlow(null);
  header("完成 ✅",true);
  main.innerHTML=`<div class="card" style="text-align:center;padding:30px 14px"><div style="font-size:40px">🍜</div><h2>${esc(lastFlow.title)} 完成</h2><div class="meta">${fmt(lastFlow.ts)} 开始 · 共 ${lastFlow.items.length} 步</div></div>
  <button class="btn primary" style="width:100%" onclick="saveFlowRec()">📁 存为凭证</button>
@@ -274,7 +294,12 @@ function finishFlow(){clearInterval(flowTimer);setFlow(null);
  extra.innerHTML=""}
 window.saveFlowRec=()=>{const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),ts:lastFlow.ts,items:lastFlow.items};
  if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)};
-function tick(){if(!FS||FS.paused)return;const el=$("#cd");if(el&&FS.endTs){const s=Math.round((FS.endTs-Date.now())/1000);el.textContent=mmss(s);if(s<=0)stepDone(true)}}
+function tick(){if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const cur=v.steps[FS.idx];
+ if(FS.paused){setTitle("⏸ 已暂停 · "+fl.title);return}
+ if(FS.endTs){const s=Math.round((FS.endTs-Date.now())/1000);
+  if(s<=0){setTitle("⏰ 时间到 · "+fl.title);if($("#cd"))renderFlowRun(fl);return}
+  setTitle(mmss(s)+" · "+cur.t+" | Memo");const el=$("#cd");if(el)el.textContent=mmss(s)}
+ else setTitle(cur.t+" · "+fl.title)}
 let curCard=null,curState=null;
 function renderCard(id){const s=SCENES.find(x=>x.id===id);if(!s){renderHome();return}
  curCard=s;curState=s.items.map(i=>({done:false,photo:null}));
