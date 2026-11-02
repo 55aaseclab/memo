@@ -32,6 +32,9 @@ main{flex:1;padding:14px 14px calc(88px + var(--safe-b))}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:8px}
 .card.ring{border-color:var(--red);background:var(--red-soft);animation:ringblink 1s ease-in-out infinite}
+.card.view .viewtag{font-size:12px;color:var(--brand);font-weight:600;margin-bottom:4px}
+.card.nowbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);padding:10px 12px}
+.step.viewed{border-left:3px solid var(--brand);padding-left:8px;background:#f4f6fd;border-radius:6px}
 @keyframes ringblink{50%{background:#fbd5d7}}
 .grid.big{gap:12px;margin-top:4px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;transition:transform .06s}
@@ -214,7 +217,7 @@ const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗
 const LS_FLOW="memo.flow.v1";
 const getFlow=()=>{try{return JSON.parse(localStorage.getItem(LS_FLOW)||"null")}catch(e){return null}};
 const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
-let FS=null,flowTimer=null,ringTimer=null,wakeLock=null,audioCtx=null,curVid=null,lastFlow=null;
+let FS=null,FV=null,FEXP=false,flowTimer=null,ringTimer=null,wakeLock=null,audioCtx=null,curVid=null,lastFlow=null;
 const mmss=s=>{s=Math.max(0,s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
 function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<3;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=880;g.gain.value=.18;const t=audioCtx.currentTime+i*.45;o.start(t);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.stop(t+.4)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
 function startRing(){if(ringTimer)return;beep();ringTimer=setInterval(beep,2000)}
@@ -252,39 +255,47 @@ function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome()
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const stale=FS.endTs&&!FS.paused&&FS.endTs<Date.now()-18e5;
  const cur=v.steps[FS.idx];const expired=FS.endTs&&!FS.paused&&Date.now()>=FS.endTs;
+ if(expired)FV=null;
+ const browsing=FV!==null&&FV!==FS.idx;const viewed=browsing?FV:FS.idx;
  header(fl.title+" · "+v.name,true);
  if(expired)startRing();else stopRing();
  if(!FS.paused&&!expired)lockScreen();else unlockScreen();
+ const remainTxt=FS.paused?"已暂停":FS.endTs?mmss(Math.max(0,Math.round((FS.endTs-Date.now())/1000))):"待完成";
  let body,controls;
  if(expired){body=`<div class="card ring"><div style="font-size:44px">⏰</div><h2>时间到！</h2><div class="meta">${esc(cur.t)}${cur.why?" — "+esc(cur.why):""}</div></div>
-  <button class="btn primary" style="width:100%" onclick="nextFlow()">${FS.idx>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button>`;
-  controls=`<button class="btn ghost" onclick="prevFlow()">◀ 上一步</button><span></span><span></span>`}
+   <button class="btn primary" style="width:100%" onclick="ackFlow()">${FS.idx>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button>`}
+ else if(browsing){const st=v.steps[viewed];
+  body=`<div class="card view"><div class="viewtag">📍 查看第 ${viewed+1} 步（只读）</div><h2>${esc(st.t)}</h2><div class="meta">${st.dur?"建议时长 "+mmss(st.dur)+" · ":""}${st.why?esc(st.why):"　"}</div></div>
+  <div class="card nowbar">⏱ 当前在：第 ${FS.idx+1} 步「${esc(cur.t)}」· ${remainTxt} <button class="btn primary" style="padding:7px 12px;font-size:13px" onclick="backCur()">回到当前</button></div>`;
+  controls=`<button class="btn ghost" onclick="navPrev()" ${viewed===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><span></span><button class="btn ghost" onclick="navNext()" ${viewed>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button>`}
  else{body=`<div class="card"><h2>${esc(cur.t)}</h2>`+(cur.dur&&!FS.paused?`<div class="cd" id="cd">--:--</div>`:cur.dur?`<div class="cd paused">已暂停</div>`:`<div class="cd manual">完成后点 ✓</div>`)+`<div class="meta">${cur.why?esc(cur.why):"　"}</div></div>`;
-  const mid=FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button>`:`<button class="btn primary" onclick="nextFlow()">✓ 完成</button>`;
-  const prev=FS.idx>0?`<button class="btn ghost" onclick="prevFlow()">◀ 上一步</button>`:`<span></span>`;
-  const next=FS.idx>=v.steps.length-1?`<button class="btn primary" onclick="nextFlow()">✅ 完成</button>`:`<button class="btn ghost" onclick="nextFlow()">下一步 ▶</button>`;
-  controls=prev+mid+next}
+  const funcs=FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button>`:`<button class="btn primary" style="grid-column:1/-1" onclick="stepDone()">✓ 完成</button>`;
+  controls=funcs}
  main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+body+
- `<div class="grid3">${controls}</div>
- <div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx&&!expired?"cur":""}"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}</div></div>`).join("")+`</div>
+ (expired?`<div class="grid3"><button class="btn ghost" onclick="navPrev()" ${FS.idx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><span></span><span></span></div>`:browsing?"":`<div class="grid3"><button class="btn ghost" onclick="navPrev()" ${FS.idx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><button class="btn ghost" onclick="navBackCur()" disabled style="opacity:.55">📍 第 ${FS.idx+1}/${v.steps.length} 步</button><button class="btn ghost" onclick="navNext()" ${FS.idx>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button></div>`)+
+ `<div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx&&!expired?"cur":""} ${i===viewed&&browsing?"viewed":""}" onclick="navTo(${i})"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}${i===FS.idx?" · 当前":""}</div></div>`).join("")+`</div>
  <button class="btn ghost" style="width:100%" onclick="abortFlow()">放弃本次</button>`;
  extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick()}
-window.prevFlow=()=>{if(!FS||FS.idx===0)return;stopRing();FS.idx--;armStep();renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.nextFlow=()=>{if(!FS)return;stopRing();stepDone()};
+window.navTo=i=>{FV=i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navPrev=()=>{if(!FS)return;FV=Math.max(0,(FV===null?FS.idx:FV)-1);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navNext=()=>{if(!FS)return;const v=FLOWS.find(x=>x.id===FS.fid).variants.find(x=>x.id===FS.vid);FV=Math.min(v.steps.length-1,(FV===null?FS.idx:FV)+1);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.backCur=()=>{FV=null;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navBackCur=()=>{FV=FS.idx;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.ackFlow=()=>{if(!FS)return;stopRing();stepDone()};
 function armStep(){const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
- FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;setFlow(FS)}
+ FV=null;FEXP=false;FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;setFlow(FS)}
 window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.find(x=>x.id===curVid);
  if(getFlow()&&!confirm("放弃上一次未完成的流程？"))return;
  FS={fid:fid,vid:v.id,idx:0,endTs:v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null,paused:false,remain:0,startedTs:Date.now()};
- setFlow(FS);renderFlowRun(fl)};
+ FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();armStep();renderFlowRun(fl)};
+window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;armStep();renderFlowRun(fl)};
 window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");nav("#/")};
 window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
  lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
- FS.idx++;if(FS.idx>=v.steps.length){finishFlow();return}
+ FS.idx++;FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
  armStep();renderFlowRun(fl)};
 function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");setFlow(null);
  header("完成 ✅",true);
