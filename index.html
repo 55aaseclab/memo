@@ -92,6 +92,25 @@ input.snap{display:none}
 .step.cur .n{background:var(--brand);color:#fff}
 .banner.run{background:#e8f0fe;border-color:#c3d0f5;color:#2a4bb3;cursor:pointer}
 .banner.run button{display:none}
+.flist{display:flex;flex-direction:column;gap:8px}
+.fstep{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+.fstep .fhead{display:flex;align-items:center;gap:10px}
+.fstep .n{width:24px;height:24px;border-radius:50%;background:var(--gray-soft);color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.fstep .ft{flex:1;font-weight:600;font-size:15px}
+.fstep .fd{font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
+.fstep.done .n{background:var(--green-soft);color:var(--green)}
+.fstep.fut{opacity:.62}
+.fstep.cur{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.fstep.cur .n{background:var(--brand);color:#fff}
+.fstep.cur .cd{margin:10px 0 6px}
+.fstep.view{border-style:dashed;border-color:var(--brand);cursor:pointer}
+.fstep.view .n{background:var(--brand-soft);color:var(--brand)}
+.fstep.view .nowmini{margin-top:8px;font-size:12px;color:var(--brand);background:var(--brand-soft);border-radius:8px;padding:6px 8px}
+.fstep.exp{border-color:var(--red);background:var(--red-soft);animation:ringblink 1s ease-in-out infinite}
+.fstep.exp .n{background:var(--red);color:#fff}
+.fstep.exp .cd{font-size:40px;color:var(--red)}
+.btnrow{display:flex;gap:8px;margin-top:8px}
+.btnrow .btn{padding:10px 0;font-size:14px}
 </style>
 </head>
 <body>
