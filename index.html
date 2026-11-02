@@ -30,7 +30,12 @@ main{flex:1;padding:14px 14px calc(88px + var(--safe-b))}
 .banner.warn{background:#fdecec;border-color:#f5c2c2;color:#8f2326}
 .cat{margin:16px 2px 8px;font-size:13px;color:var(--t2);font-weight:600}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid.big{gap:12px;margin-top:4px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;transition:transform .06s}
+.tile.big{padding:26px 16px;border-radius:16px}
+.tile.big .em{font-size:34px}
+.tile.big .t{font-size:17px;margin-top:8px}
+.tile.big .s{font-size:12px}
 .tile:active{transform:scale(.97)}
 .tile .em{font-size:22px}
 .tile .t{font-weight:600;margin-top:6px;font-size:15px}
@@ -162,20 +167,24 @@ function toast(msg){let t=$(".toast");if(!t){t=document.createElement("div");t.c
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function nav(h){location.hash=h}
 function route(){const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
- if(p==="")renderHome();else if(p==="c")renderCard(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
+ if(p==="")renderHome();else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
 function header(title,back,sub){hd.innerHTML=(back?'<button class="back" onclick="history.back()">‹</button>':"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(isStandalone?'<button class="ref" title="刷新" onclick="doRefresh(event)">⟳</button>':"")}
 document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("./sw.js").catch(()=>{})}});
 function banner(){if(isStandalone)return"";if(isWeChat)return'<div class="banner warn">ⓘ 微信内打开功能受限：点右上角 ··· 选择「在浏览器中打开」体验完整功能</div>';if(isIOS&&getPref("a2hsHide")&&Date.now()-getPref("a2hsHide")<7*864e5)return"";return `<div class="banner">📤 iPhone：分享按钮 → 添加到主屏幕，关键时刻 1 秒打开<button onclick="hideA2hs()">×</button></div>`}
 function hideA2hs(){setPref("a2hsHide",Date.now());route()}
 window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
 window.hideA2hs=hideA2hs;
+const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"}];
 function renderHome(){header("Memo","",'关键时刻留证');
  const recs=getRecs();
- main.innerHTML=banner()+
- ["🏨 住店","🚗 租车","🚕 打车","🚌 公交"].map(cat=>`<div class="cat">${cat}</div><div class="grid">`+SCENES.filter(s=>s.cat===cat).map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>").join("")+
+ main.innerHTML=banner()+`<div class="grid big">`+CATS.map(c=>{const n=SCENES.filter(s=>s.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${c.id}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>"+
  `<div class="privacy">🔒 数据仅保存在本机，不上传任何服务器</div>`;
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
 window.nav=nav;
+function renderCat(id){const c=CATS.find(x=>x.id===id);if(!c){renderHome();return}
+ header(c.name,true);
+ main.innerHTML=`<div class="grid">`+SCENES.filter(s=>s.cat===c.label).map(s=>`<div class="tile" onclick="nav('#/c/${s.id}')"><div class="em">${s.em}</div><div class="t">${esc(s.title)}</div><div class="s">${esc(s.sub)}</div></div>`).join("")+"</div>";
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案</button></div>`}
 let curCard=null,curState=null;
 function renderCard(id){const s=SCENES.find(x=>x.id===id);if(!s){renderHome();return}
  curCard=s;curState=s.items.map(i=>({done:false,photo:null}));
