@@ -4,7 +4,7 @@
 
 单文件 H5/PWA，无构建、无依赖、无后端，数据仅存本机 localStorage。
 
-- 产品文档：[docs/Memo_PRD_V0.1.0.md](docs/Memo_PRD_V0.1.0.md)
+- 产品文档：[docs/Memo_PRD_V0.2.0.md](docs/Memo_PRD_V0.2.0.md)
 
 ## 本地运行
 
@@ -30,12 +30,12 @@ git push                     # GitHub Pages（Settings 里开启）
 ```
 index.html          # 全部产品（内容引擎 SCENES/INCIDENTS + 视图 + 存储）
 sw.js                # Service Worker：network-first 缓存 + 离线回退
-docs/Memo_PRD_V0.1.0.md
+docs/Memo_PRD_V0.2.0.md
 ```
 
 ## 版本
 
-- V0.1.0（当前，与 PRD 版本一致）：8 张时刻卡（住店/租车/打车/公交）、水印拍照、凭证档案、出事了分诊、主屏引导、deeplink（`#/c/hotel-out`）
+- V0.2.0（当前，与 PRD 版本一致）：10 张时刻卡（住店/租车/打车/公交/煮面）、水印拍照、凭证档案、出事了分诊、主屏引导、deeplink（`#/c/hotel-out`）
 - V1 规划：事件时间轴、服务号触达、云端加密备份、埋点
 
 ## 版本纪律

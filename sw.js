@@ -1,4 +1,4 @@
-const CACHE = "memo-v0.1.0";
+const CACHE = "memo-v0.2.0";
 const ASSETS = ["./", "./index.html"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

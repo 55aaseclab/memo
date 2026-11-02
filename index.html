@@ -126,7 +126,17 @@ const SCENES=[
  {t:"提前一站起身到后门",ph:false,why:""},
  {t:"回头看座位、脚下、窗沿",ph:false,why:"手机和雨伞是公交遗失物前两名"},
  {t:"确认刷卡扣费成功",ph:false,why:"异常扣费当场截图，事后难举证"},
- {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]}
+ {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]},
+{id:"noodle-in",cat:"🍜 煮面",em:"💧",title:"下锅前 30 秒",sub:"备好节奏，面不糊锅",items:[
+ {t:"水开再下面，别冷水下锅",ph:false,why:"冷水下锅外层糊化粘底"},
+ {t:"水里加一小撮盐",ph:false,why:"防粘，还能给面入底味"},
+ {t:"碗、酱料、浇头先摆好",ph:false,why:"出锅节奏快，现找必手忙"},
+ {t:"点火后人不离开灶台",ph:false,why:"扑锅和烧干都在一分钟内发生"}]},
+{id:"noodle-out",cat:"🍜 煮面",em:"🔥",title:"关火前 10 秒",sub:"面熟了，火必须死",items:[
+ {t:"夹一根尝，芯不硬就到火候",ph:false,why:"余温还会继续加热，宁可欠一点"},
+ {t:"防扑锅：转小火或加半碗冷水",ph:false,why:"溢锅浇灭火苗是燃气灶最险一幕"},
+ {t:"关火后看一眼火苗确实熄灭",ph:false,why:"忘关火是厨房第一大事故源"},
+ {t:"湿抹布垫手端锅，慢倒别溅",ph:false,why:""}]}
 ];
 const INCIDENTS=[
 {id:"deposit",em:"💰",t:"押金被乱扣",cat:["hotel-out","car-out","car-in"],steps:[
@@ -174,7 +184,7 @@ function banner(){if(isStandalone)return"";if(isWeChat)return'<div class="banner
 function hideA2hs(){setPref("a2hsHide",Date.now());route()}
 window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
 window.hideA2hs=hideA2hs;
-const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"}];
+const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"noodle",label:"🍜 煮面",name:"煮面"}];
 function renderHome(){header("Memo","",'关键时刻留证');
  const recs=getRecs();
  main.innerHTML=banner()+`<div class="grid big">`+CATS.map(c=>{const n=SCENES.filter(s=>s.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${c.id}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>"+
