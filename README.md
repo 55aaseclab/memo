@@ -28,8 +28,9 @@ git push                     # GitHub Pages（Settings 里开启）
 ## 结构
 
 ```
-index.html          # 全部产品（内容引擎 SCENES/INCIDENTS + 视图 + 存储）
+index.html          # 全部产品（内容引擎 SCENES/FLOWS/INCIDENTS + 视图 + 存储）
 sw.js                # Service Worker：network-first 缓存 + 离线回退
+docs/investment.md  # 投资备忘录（investor-skill 06 SOP，自用决策版）
 docs/Memo_PRD.md
 ```
 
