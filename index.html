@@ -164,7 +164,7 @@ const SCENES=[
  {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]}
 ];
 const FLOWS=[
- {id:"noodle",cat:"🍳 烹饪",em:"🍜",title:"煮面",sub:"跟时间线走，到点叫你",
+ {id:"noodle",cat:"🍳 烹饪",em:"🍜",title:"煮面",sub:"跟时间线走，到点叫你",ev:false,
   variants:[
    {id:"instant",name:"方便面",steps:[
     {t:"烧水",dur:180,why:"大火全开，盖盖更快"},
@@ -321,11 +321,16 @@ window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v
  FS.idx++;FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
  armStep();renderFlowRun(fl)};
 function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");setFlow(null);
+ const fl=FLOWS.find(x=>x.id===lastFlow.fid);const proof=fl&&fl.ev;
  header("完成 ✅",true);
  main.innerHTML=`<div class="card" style="text-align:center;padding:30px 14px"><div style="font-size:40px">🍜</div><h2>${esc(lastFlow.title)} 完成</h2><div class="meta">${fmt(lastFlow.ts)} 开始 · 共 ${lastFlow.items.length} 步</div></div>
- <button class="btn primary" style="width:100%" onclick="saveFlowRec()">📁 存为凭证</button>
+ ${proof?`<button class="btn primary" style="width:100%" onclick="saveFlowRec()">🛡 存为凭证</button>`:`<button class="btn primary" style="width:100%" onclick="flowShot()">📸 拍照留念</button>`}
  <button class="btn ghost" style="width:100%;margin-top:10px" onclick="nav('#/')">不用了，回首页</button>`;
  extra.innerHTML=""}
+window.flowShot=()=>{snap.value="";snap.onchange=async()=>{const f=snap.files&&snap.files[0];if(!f)return;
+ try{const url=await watermark(f,lastFlow.title);
+ const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),kind:"memo",ts:Date.now(),items:[{t:"留念",done:true,photo:url}]};
+ if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)}catch(e){toast("照片读取失败，请重拍")}};snap.click()};
 window.saveFlowRec=()=>{const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),ts:lastFlow.ts,items:lastFlow.items};
  if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)};
 function tick(){if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const cur=v.steps[FS.idx];
@@ -343,14 +348,15 @@ function renderCard(id){const s=SCENES.find(x=>x.id===id);if(!s){renderHome();re
  <div class="privacy">中途回返不会保存任何内容</div>`;
  extra.innerHTML=""}
 window.toggleItem=i=>{curState[i].done=!curState[i].done;const el=$("#it"+i);el.classList.toggle("done",curState[i].done);el.querySelector(".cb").textContent=curState[i].done?"✓":""};
-window.snapPhoto=i=>{snap.value="";snap.onchange=async()=>{const f=snap.files&&snap.files[0];if(!f)return;try{const url=await watermark(f);curState[i].photo=url;const old=$("#th"+i);if(old)old.remove();const img=document.createElement("img");img.src=url;img.className="thumb";img.id="th"+i;$("#it"+i).appendChild(img)}catch(e){toast("照片读取失败，请重拍")}};snap.click()};
-async function watermark(file){const dataUrl=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
+window.snapPhoto=i=>{snap.value="";snap.onchange=async()=>{const f=snap.files&&snap.files[0];if(!f)return;try{const url=await watermark(f,curCard.title);curState[i].photo=url;const old=$("#th"+i);if(old)old.remove();const img=document.createElement("img");img.src=url;img.className="thumb";img.id="th"+i;$("#it"+i).appendChild(img)}catch(e){toast("照片读取失败，请重拍")}};snap.click()};
+async function watermark(file,label){label=label||(curCard?curCard.title:"Memo");
+const dataUrl=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
  const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=dataUrl});
  const max=1280,sc=Math.min(1,max/Math.max(img.width,img.height));
  const c=document.createElement("canvas");c.width=img.width*sc;c.height=img.height*sc;
  const x=c.getContext("2d");x.drawImage(img,0,0,c.width,c.height);
  const line=Math.max(12,Math.round(c.width/34));x.font=`600 ${line}px sans-serif`;
- const label=`Memo · ${curCard.title} · ${fmt(Date.now())}`;
+ label=`Memo · ${label} · ${fmt(Date.now())}`;
  const w=x.measureText(label).width;x.fillStyle="rgba(0,0,0,.55)";x.fillRect(8,c.height-line*2.2,w+line,c.line*0+line*1.6);
  x.fillStyle="#fff";x.textBaseline="middle";x.fillText(label,8+line/2,c.height-line*2.2+line*0.8);
  return c.toDataURL("image/jpeg",0.6)}
@@ -360,20 +366,20 @@ window.finishCard=()=>{const done=curState.filter(i=>i.done).length;if(!done){to
 function renderRecords(){header("我的档案",true);
  const recs=getRecs();
  main.innerHTML=recs.length?recs.map(r=>{const n=r.items.filter(i=>i.photo).length;
- return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">📄</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${fmt(r.ts)} · 照片 ${n} 张</div></div><div style="color:var(--t3)">›</div></div>`}).join(""):`<div class="empty">还没有凭证<br>去首页开始第一张时刻卡吧</div><button class="btn primary" style="width:100%" onclick="nav('#/')">去首页</button>`;
+ return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">${r.kind==="memo"?"🌸":"🛡"}</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${r.kind==="memo"?"留念 · ":""}${fmt(r.ts)} · 照片 ${n} 张</div></div><div style="color:var(--t3)">›</div></div>`}).join(""):`<div class="empty">还没有凭证<br>去首页开始第一张时刻卡吧</div><button class="btn primary" style="width:100%" onclick="nav('#/')">去首页</button>`;
  extra.innerHTML=""}
 function renderRecord(id){const r=getRecs().find(x=>x.id===id);if(!r){renderRecords();return}
- header("凭证详情",true);
+ header(r.kind==="memo"?"留念":"凭证详情",true);
  const photos=r.items.filter(i=>i.photo);
- main.innerHTML=`<div class="card"><h2>${esc(sceneTitle(r.sceneId))}</h2><div class="meta">生成于 ${fmt(r.ts)}</div>
+ main.innerHTML=`<div class="card"><h2>${esc(sceneTitle(r.sceneId))}</h2><div class="meta">${r.kind==="memo"?"🌸 留念 · ":""}${fmt(r.ts)}</div>
  ${r.items.map(i=>`<div class="item ${i.done?"done":""}" style="cursor:default"><div class="cb">${i.done?"✓":""}</div><div class="txt">${esc(i.t)}${i.photo?`<div class="why">📷 已留证</div>`:""}</div></div>`).join("")}</div>
  ${photos.length?`<div class="card"><div class="meta">照片（带时间水印）</div><div class="photogrid">${photos.map(i=>`<img src="${i.photo}" onclick="lb(this.src)">`).join("")}</div></div>`:""}
- <button class="btn primary" style="width:100%" onclick="copyRec('${r.id}')">📋 复制为文本</button>
- <button class="btn ghost" style="width:100%;margin-top:10px" onclick="delRec('${r.id}')">🗑 删除此凭证</button>`;
+ ${r.kind==="memo"?"":`<button class="btn primary" style="width:100%" onclick="copyRec('${r.id}')">📋 复制为文本</button>`}
+ <button class="btn ghost" style="width:100%;margin-top:10px" onclick="delRec('${r.id}')">🗑 删除</button>`;
  extra.innerHTML=""}
 window.lb=src=>{extra.insertAdjacentHTML("beforeend",`<div class="lightbox" onclick="this.remove()"><img src="${src}"></div>`)};
 window.copyRec=id=>{const r=getRecs().find(x=>x.id===id);if(!r)return;
- const txt=`Memo 凭证\n场景：${sceneTitle(r.sceneId)}\n时间：${fmt(r.ts)}\n清单：\n${r.items.map(i=>(i.done?"✅ ":"☐ ")+i.t).join("\n")}\n照片：${r.items.filter(i=>i.photo).length} 张（带时间水印，见本机档案）`;
+ const txt=r.kind==="memo"?`Memo 留念\n场景：${sceneTitle(r.sceneId)}\n时间：${fmt(r.ts)}`:`Memo 凭证\n场景：${sceneTitle(r.sceneId)}\n时间：${fmt(r.ts)}\n清单：\n${r.items.map(i=>(i.done?"✅ ":"☐ ")+i.t).join("\n")}\n照片：${r.items.filter(i=>i.photo).length} 张（带时间水印，见本机档案）`;
  const ok=()=>toast("已复制，可直接粘贴到申诉/聊天");
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,()=>fallbackCopy(txt,ok))}else fallbackCopy(txt,ok)};
 function fallbackCopy(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){toast("复制失败，请手动截屏")}ta.remove()}
@@ -383,7 +389,7 @@ function renderSosHome(){header("出事了",true);
  extra.innerHTML=""}
 function renderSos(id){const x=INCIDENTS.find(i=>i.id===id);if(!x){renderSosHome();return}
  header(x.t,true);
- const recs=getRecs().filter(r=>x.cat.includes(r.sceneId));
+ const recs=getRecs().filter(r=>(r.kind||"proof")==="proof"&&x.cat.includes(r.sceneId));
  main.innerHTML=`<div class="card">${x.steps.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${esc(s)}</div></div>`).join("")}</div>
  ${recs.length?`<div class="cat">相关凭证</div>${recs.map(r=>{return `<div class="rec" onclick="nav('#/r/${r.id}')"><div class="em">📄</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${fmt(r.ts)}</div></div><div style="color:var(--t3)">›</div></div>`}).join("")}`:`<div class="card" style="color:var(--t3);font-size:13px">本次没有留证。按上面步骤走，以后入场时先开一张时刻卡。</div>`}`;
  extra.innerHTML=""}
