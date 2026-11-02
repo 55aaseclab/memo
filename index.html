@@ -256,31 +256,33 @@ window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const stale=FS.endTs&&!FS.paused&&FS.endTs<Date.now()-18e5;
  const cur=v.steps[FS.idx];const expired=FS.endTs&&!FS.paused&&Date.now()>=FS.endTs;
  if(expired)FV=null;
- const browsing=FV!==null&&FV!==FS.idx;const viewed=browsing?FV:FS.idx;
+ const browsing=FV!==null&&FV!==FS.idx;const viewIdx=browsing?FV:FS.idx;
  header(fl.title+" · "+v.name,true);
  if(expired)startRing();else stopRing();
  if(!FS.paused&&!expired)lockScreen();else unlockScreen();
  const remainTxt=FS.paused?"已暂停":FS.endTs?mmss(Math.max(0,Math.round((FS.endTs-Date.now())/1000))):"待完成";
- let body,controls;
- if(expired){body=`<div class="card ring"><div style="font-size:44px">⏰</div><h2>时间到！</h2><div class="meta">${esc(cur.t)}${cur.why?" — "+esc(cur.why):""}</div></div>
-   <button class="btn primary" style="width:100%" onclick="ackFlow()">${FS.idx>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button>`}
- else if(browsing){const st=v.steps[viewed];
-  body=`<div class="card view"><div class="viewtag">📍 查看第 ${viewed+1} 步（只读）</div><h2>${esc(st.t)}</h2><div class="meta">${st.dur?"建议时长 "+mmss(st.dur)+" · ":""}${st.why?esc(st.why):"　"}</div></div>
-  <div class="card nowbar">⏱ 当前在：第 ${FS.idx+1} 步「${esc(cur.t)}」· ${remainTxt} <button class="btn primary" style="padding:7px 12px;font-size:13px" onclick="backCur()">回到当前</button></div>`;
-  controls=`<button class="btn ghost" onclick="navPrev()" ${viewed===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><span></span><button class="btn ghost" onclick="navNext()" ${viewed>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button>`}
- else{body=`<div class="card"><h2>${esc(cur.t)}</h2>`+(cur.dur&&!FS.paused?`<div class="cd" id="cd">--:--</div>`:cur.dur?`<div class="cd paused">已暂停</div>`:`<div class="cd manual">完成后点 ✓</div>`)+`<div class="meta">${cur.why?esc(cur.why):"　"}</div></div>`;
-  const funcs=FS.paused?`<button class="btn primary" onclick="resumeFlow()">▶ 继续</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button>`:cur.dur&&FS.endTs?`<button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button>`:`<button class="btn primary" style="grid-column:1/-1" onclick="stepDone()">✓ 完成</button>`;
-  controls=funcs}
- main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+body+
- (expired?`<div class="grid3"><button class="btn ghost" onclick="navPrev()" ${FS.idx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><span></span><span></span></div>`:browsing?"":`<div class="grid3"><button class="btn ghost" onclick="navPrev()" ${FS.idx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><button class="btn ghost" onclick="navBackCur()" disabled style="opacity:.55">📍 第 ${FS.idx+1}/${v.steps.length} 步</button><button class="btn ghost" onclick="navNext()" ${FS.idx>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button></div>`)+
- `<div class="card" style="margin-top:10px">`+v.steps.map((st,i)=>`<div class="step ${i<FS.idx?"done":""} ${i===FS.idx&&!expired?"cur":""} ${i===viewed&&browsing?"viewed":""}" onclick="navTo(${i})"><div class="n">${i<FS.idx?"✓":i+1}</div><div style="${i<FS.idx?"color:var(--t3)":""}">${esc(st.t)}${st.dur?` · ${mmss(st.dur)}`:""}${i===FS.idx?" · 当前":""}</div></div>`).join("")+`</div>
- <button class="btn ghost" style="width:100%" onclick="abortFlow()">放弃本次</button>`;
- extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick()}
-window.navTo=i=>{FV=i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.navPrev=()=>{if(!FS)return;FV=Math.max(0,(FV===null?FS.idx:FV)-1);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.navNext=()=>{if(!FS)return;const v=FLOWS.find(x=>x.id===FS.fid).variants.find(x=>x.id===FS.vid);FV=Math.min(v.steps.length-1,(FV===null?FS.idx:FV)+1);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+ const row=(st,i,cls)=>`<div class="fstep ${cls}" id="step-${i}"><div class="fhead"><div class="n">${cls==="done"?"✓":i+1}</div><div class="ft">${esc(st.t)}</div><div class="fd">${st.dur?mmss(st.dur):""}</div></div>`;
+ let list="";
+ for(let i=0;i<v.steps.length;i++){const st=v.steps[i];
+  if(i===FS.idx){
+   if(expired){list+=row(st,i,"exp")+`<div class="cd">⏰ 时间到</div><div class="meta">${esc(st.why||"　")}</div><button class="btn primary" style="width:100%;margin-top:8px" onclick="ackFlow()">${i>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button></div>`}
+   else{list+=row(st,i,"cur")+`<div class="cd ${FS.paused?"paused":""}" id="cd">${FS.paused?"已暂停":"--:--"}</div>`+(st.why?`<div class="meta">${esc(st.why)}</div>`:"")+
+    (FS.paused?`<div class="btnrow"><button class="btn primary" onclick="resumeFlow()">▶ 继续</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div>`:
+     st.dur&&FS.endTs?`<div class="btnrow"><button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div>`:
+     `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">✓ 完成</button>`)+`</div>`}}
+  else if(browsing&&i===viewIdx){list+=`<div class="fstep view" id="step-${i}" onclick="backCur()"><div class="fhead"><div class="n">${i+1}</div><div class="ft">${esc(st.t)}</div><div class="fd">查看中 ×</div></div><div class="meta">${st.dur?"建议 "+mmss(st.dur)+" · ":""}${esc(st.why||"　")}</div><div class="nowmini">⏱ 当前在第 ${FS.idx+1} 步 · ${remainTxt} — 点此回到当前</div></div>`}
+  else{list+=row(st,i,i<FS.idx?"done":"fut")+`</div>`}}
+ main.innerHTML=(stale?`<div class="banner warn">这锅可能已经凉了/糊了，建议重走<button onclick="resetFlow()">重走</button></div>`:"")+
+ `<div class="flist">`+list+`</div>
+ <div class="grid3" style="margin-top:12px"><button class="btn ghost" onclick="navPrev()" ${viewIdx===0?"disabled style='opacity:.4'":""}>◀ 上一步</button><button class="btn ghost" onclick="${browsing?"backCur()":"noop()"}" style="${browsing?"":"opacity:.55;pointer-events:none"}">${browsing?"回到当前":"📍 当前"}</button><button class="btn ghost" onclick="navNext()" ${viewIdx>=v.steps.length-1?"disabled style='opacity:.4'":""}>下一步 ▶</button></div>
+ <button class="btn ghost" style="width:100%;margin-top:10px" onclick="abortFlow()">放弃本次</button>`;
+ extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick();
+ const ex=document.getElementById("step-"+viewIdx);ex&&ex.scrollIntoView({block:"nearest",behavior:"smooth"})}
+window.noop=()=>{};
+window.navTo=i=>{if(!FS)return;FV=i===FS.idx?null:i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navPrev=()=>{if(!FS)return;const n=Math.max(0,(FV===null?FS.idx:FV)-1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navNext=()=>{if(!FS)return;const v=FLOWS.find(x=>x.id===FS.fid).variants.find(x=>x.id===FS.vid);const n=Math.min(v.steps.length-1,(FV===null?FS.idx:FV)+1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.backCur=()=>{FV=null;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.navBackCur=()=>{FV=FS.idx;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.ackFlow=()=>{if(!FS)return;stopRing();stepDone()};
 function armStep(){const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
  FV=null;FEXP=false;FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;setFlow(FS)}
