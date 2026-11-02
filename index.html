@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Memo · 关键时刻留证</title>
-<meta name="description" content="关键时刻打开，60 秒做完，带走凭证。数据仅保存在本机。">
+<title>Memo · 万事如意</title>
+<meta name="description" content="管好人生万件事：住店、租车、打车、公交、烹饪。关键时刻打开，60 秒做完，带走凭证。数据仅保存在本机。">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Memo">
 <meta name="theme-color" content="#3451b2">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233451b2'/%3E%3Ctext x='32' y='42' font-size='26' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233451b2'/%3E%3Ctext x='32' y='42' font-size='26' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
-<link rel="manifest" href='data:application/manifest+json,{"name":"Memo · 关键时刻留证","short_name":"Memo","start_url":"./","display":"standalone","background_color":"%23ffffff","theme_color":"%233451b2","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%233451b2%27/%3E%3Ctext x=%2732%27 y=%2742%27 font-size=%2726%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EM%3C/text%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Memo · 万事如意","short_name":"Memo","start_url":"./","display":"standalone","background_color":"%23ffffff","theme_color":"%233451b2","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%233451b2%27/%3E%3Ctext x=%2732%27 y=%2742%27 font-size=%2726%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EM%3C/text%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
 <style>
 :root{--brand:#3451b2;--brand2:#3a5ccc;--bg:#f6f7fb;--card:#fff;--t1:#1f2329;--t2:#5c6470;--t3:#9096a0;--line:#e7e9ef;--green:#18794e;--red:#b8272c;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -241,7 +241,7 @@ function toast(msg){let t=$(".toast");if(!t){t=document.createElement("div");t.c
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function nav(h){location.hash=h}
 function route(){const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
- if(p!=="f"){clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();setTitle("Memo · 关键时刻留证")}
+ if(p!=="f"){clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();setTitle("Memo · 万事如意")}
  if(p==="")renderHome();else if(p==="t")renderTop(parts[1]);else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
 function header(title,back,sub){hd.innerHTML=(back?'<button class="back" onclick="history.back()">‹</button>':"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(isStandalone?'<button class="ref" title="刷新" onclick="doRefresh(event)">⟳</button>':"")}
 document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){
@@ -269,12 +269,12 @@ function setTitle(t){document.title=t}
 function sceneTitle(id){const s=SCENES.find(x=>x.id===id);if(s)return s.title;
  const m=/^flow-(.+?)-(.+)$/.exec(id);if(m){const fl=FLOWS.find(x=>x.id===m[1]);const v=fl&&fl.variants.find(v=>v.id===m[2]);if(fl)return fl.title+" · "+(v?v.name:"")}
  return id}
-function renderHome(){header("Memo","",'关键时刻留证');
+function renderHome(){header("Memo","",'万事如意');
  const recs=getRecs();const f=getFlow();let fb="";
  if(f){const fl=FLOWS.find(x=>x.id===f.fid);const v=fl&&fl.variants.find(v=>v.id===f.vid);let rem="";
   if(f.paused)rem="已暂停";else if(f.endTs){const s=Math.round((f.endTs-Date.now())/1000);rem=s>0?"剩 "+mmss(s):(Date.now()-f.endTs>18e5?"已超时":"时间到")}else rem="进行中";
   fb=`<div class="banner run" onclick="nav('#/f/${f.fid}')">🍳 ${fl?fl.title:"流程"}（${v?v.name:""}）${rem} · 点继续 →<button onclick="event.stopPropagation()">▶</button></div>`}
- main.innerHTML=banner()+fb+`<div class="grid big">`+TOPS.map(t=>{const n=t.cats.reduce((a,cid)=>{const c=CATS.find(x=>x.id===cid);return a+SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length},0);const sub=t.cats.length>1?`${t.cats.length} 类 · ${n} 个关键时刻`:`${n} 个流程`;return `<div class="tile big" onclick="nav('#/t/${t.id}')"><div class="em">${t.em}</div><div class="t">${t.name}</div><div class="s">${sub}</div></div>`}).join("")+"</div>"+
+ main.innerHTML=banner()+fb+`<div class="grid big">`+TOPS.map(t=>{const n=t.cats.reduce((a,cid)=>{const c=CATS.find(x=>x.id===cid);return a+SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length},0);const sub=t.cats.length>1?`${t.cats.length} 类 · ${n} 件事`:`${n} 个流程`;return `<div class="tile big" onclick="nav('#/t/${t.id}')"><div class="em">${t.em}</div><div class="t">${t.name}</div><div class="s">${sub}</div></div>`}).join("")+"</div>"+
  `<div class="privacy">🔒 数据仅保存在本机，不上传任何服务器</div>`;
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
 window.nav=nav;
@@ -326,7 +326,7 @@ function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const runn
 function renderTop(tid){const t=TOPS.find(x=>x.id===tid);if(!t){renderHome();return}
  if(t.cats.length===1){renderCat(t.cats[0]);return}
  header(t.name,true);
- main.innerHTML=`<div class="grid big">`+t.cats.map(cid=>{const c=CATS.find(x=>x.id===cid);const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${cid}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>";
+ main.innerHTML=`<div class="grid big">`+t.cats.map(cid=>{const c=CATS.find(x=>x.id===cid);const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${cid}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 件事</div></div>`}).join("")+"</div>";
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案</button></div>`}
 window.noop=()=>{};
 window.navTo=i=>{if(!FS)return;FV=i===FS.idx?null:i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
@@ -344,12 +344,12 @@ window.pickVid=id=>{const fid=location.hash.slice(2).split("/")[1];curVid=id;set
 window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
-window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");nav("#/")};
+window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 万事如意");nav("#/")};
 window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
  lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
  FS.idx++;stopRing();FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
  FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
-function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");setFlow(null);
+function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 万事如意");setFlow(null);
  const fl=FLOWS.find(x=>x.id===lastFlow.fid);const proof=fl&&fl.ev;
  header("完成 ✅",true);
  main.innerHTML=`<div class="card" style="text-align:center;padding:30px 14px"><div style="font-size:40px">🍜</div><h2>${esc(lastFlow.title)} 完成</h2><div class="meta">${fmt(lastFlow.ts)} 开始 · 共 ${lastFlow.items.length} 步</div></div>
