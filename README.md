@@ -4,7 +4,7 @@
 
 单文件 H5/PWA，无构建、无依赖、无后端，数据仅存本机 localStorage。
 
-- 产品文档：[docs/Memo_PRD_V0.2.0.md](docs/Memo_PRD_V0.2.0.md)
+- 产品文档：[docs/Memo_PRD.md](docs/Memo_PRD.md)
 
 ## 本地运行
 
@@ -30,7 +30,7 @@ git push                     # GitHub Pages（Settings 里开启）
 ```
 index.html          # 全部产品（内容引擎 SCENES/INCIDENTS + 视图 + 存储）
 sw.js                # Service Worker：network-first 缓存 + 离线回退
-docs/Memo_PRD_V0.2.0.md
+docs/Memo_PRD.md
 ```
 
 ## 版本
