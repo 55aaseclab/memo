@@ -242,7 +242,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 function nav(h){location.hash=h}
 function route(){const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
  if(p!=="f"){clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();setTitle("Memo · 关键时刻留证")}
- if(p==="")renderHome();else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
+ if(p==="")renderHome();else if(p==="t")renderTop(parts[1]);else if(p==="s")renderCat(parts[1]);else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
 function header(title,back,sub){hd.innerHTML=(back?'<button class="back" onclick="history.back()">‹</button>':"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(isStandalone?'<button class="ref" title="刷新" onclick="doRefresh(event)">⟳</button>':"")}
 document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){
  let reloaded=false;
@@ -254,6 +254,7 @@ function hideA2hs(){setPref("a2hsHide",Date.now());route()}
 window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
 window.hideA2hs=hideA2hs;
 const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
+const TOPS=[{id:"travel",em:"🧳",name:"出行",cats:["hotel","car","taxi","bus"]},{id:"cook",em:"🍳",name:"烹饪",cats:["cook"]}];
 const LS_FLOW="memo.flow.v1";
 const getFlow=()=>{try{const f=JSON.parse(localStorage.getItem(LS_FLOW)||"null");if(f&&f.run===undefined)f.run=!!f.endTs;return f}catch(e){return null}};
 const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
@@ -273,7 +274,7 @@ function renderHome(){header("Memo","",'关键时刻留证');
  if(f){const fl=FLOWS.find(x=>x.id===f.fid);const v=fl&&fl.variants.find(v=>v.id===f.vid);let rem="";
   if(f.paused)rem="已暂停";else if(f.endTs){const s=Math.round((f.endTs-Date.now())/1000);rem=s>0?"剩 "+mmss(s):(Date.now()-f.endTs>18e5?"已超时":"时间到")}else rem="进行中";
   fb=`<div class="banner run" onclick="nav('#/f/${f.fid}')">🍳 ${fl?fl.title:"流程"}（${v?v.name:""}）${rem} · 点继续 →<button onclick="event.stopPropagation()">▶</button></div>`}
- main.innerHTML=banner()+fb+`<div class="grid big">`+CATS.map(c=>{const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${c.id}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>"+
+ main.innerHTML=banner()+fb+`<div class="grid big">`+TOPS.map(t=>{const n=t.cats.reduce((a,cid)=>{const c=CATS.find(x=>x.id===cid);return a+SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length},0);const sub=t.cats.length>1?`${t.cats.length} 类 · ${n} 个关键时刻`:`${n} 个流程`;return `<div class="tile big" onclick="nav('#/t/${t.id}')"><div class="em">${t.em}</div><div class="t">${t.name}</div><div class="s">${sub}</div></div>`}).join("")+"</div>"+
  `<div class="privacy">🔒 数据仅保存在本机，不上传任何服务器</div>`;
  extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
 window.nav=nav;
@@ -322,6 +323,11 @@ function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const runn
  <button class="btn ghost" style="width:100%;margin-top:10px" onclick="abortFlow()">放弃本次</button>`;
  extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick();
  const ex=document.getElementById("step-"+viewIdx);ex&&ex.scrollIntoView({block:"nearest",behavior:"smooth"})}
+function renderTop(tid){const t=TOPS.find(x=>x.id===tid);if(!t){renderHome();return}
+ if(t.cats.length===1){renderCat(t.cats[0]);return}
+ header(t.name,true);
+ main.innerHTML=`<div class="grid big">`+t.cats.map(cid=>{const c=CATS.find(x=>x.id===cid);const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<div class="tile big" onclick="nav('#/s/${cid}')"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${c.name}</div><div class="s">${n} 个关键时刻</div></div>`}).join("")+"</div>";
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">⚠️ 出事了</button><button class="btn primary" onclick="nav('#/r')">📁 我的档案</button></div>`}
 window.noop=()=>{};
 window.navTo=i=>{if(!FS)return;FV=i===FS.idx?null:i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.navPrev=()=>{if(!FS)return;const n=Math.max(0,(FV===null?FS.idx:FV)-1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
