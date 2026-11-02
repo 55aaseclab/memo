@@ -29,6 +29,7 @@ git push                     # GitHub Pages（Settings 里开启）
 
 ```
 index.html          # 全部产品（内容引擎 SCENES/INCIDENTS + 视图 + 存储）
+sw.js                # Service Worker：network-first 缓存 + 离线回退
 docs/Memo_PRD_V0.1.md
 ```
 
