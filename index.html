@@ -87,6 +87,7 @@ input.snap{display:none}
 .cd{font-size:64px;font-weight:800;color:var(--t1);text-align:center;margin:10px 0;font-variant-numeric:tabular-nums}
 .cd.paused{color:#915930;font-size:24px}
 .cd.manual{color:var(--t2);font-size:20px}
+.cd.idle{color:var(--t3);font-size:28px}
 .step.done .n{background:var(--green-soft);color:var(--green)}
 .step.cur{background:#eef1fb;margin:0 -14px;padding:10px 14px}
 .step.cur .n{background:var(--brand);color:#fff}
@@ -236,7 +237,7 @@ window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(
 window.hideA2hs=hideA2hs;
 const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
 const LS_FLOW="memo.flow.v1";
-const getFlow=()=>{try{return JSON.parse(localStorage.getItem(LS_FLOW)||"null")}catch(e){return null}};
+const getFlow=()=>{try{const f=JSON.parse(localStorage.getItem(LS_FLOW)||"null");if(f&&f.run===undefined)f.run=!!f.endTs;return f}catch(e){return null}};
 const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
 let FS=null,FV=null,FEXP=false,flowTimer=null,ringTimer=null,wakeLock=null,audioCtx=null,curVid=null,openVid=null,lastFlow=null;
 const mmss=s=>{s=Math.max(0,s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
@@ -274,22 +275,26 @@ function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome()
   extra.innerHTML="";return}
  renderFlowRun(fl)}
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
-function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const stale=FS.endTs&&!FS.paused&&FS.endTs<Date.now()-18e5;
- const cur=v.steps[FS.idx];const expired=FS.endTs&&!FS.paused&&Date.now()>=FS.endTs;
+function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const running=FS.run&&FS.endTs;const stale=running&&!FS.paused&&FS.endTs<Date.now()-18e5;
+ const cur=v.steps[FS.idx];const expired=running&&!FS.paused&&Date.now()>=FS.endTs;
  if(expired)FV=null;
  const browsing=FV!==null&&FV!==FS.idx;const viewIdx=browsing?FV:FS.idx;
  header(fl.title+" · "+v.name,true);
  if(expired)startRing();else stopRing();
- if(!FS.paused&&!expired)lockScreen();else unlockScreen();
- const remainTxt=FS.paused?"已暂停":FS.endTs?mmss(Math.max(0,Math.round((FS.endTs-Date.now())/1000))):"待完成";
+ if(FS.run&&!FS.paused&&!expired)lockScreen();else unlockScreen();
+ const remainTxt=!FS.run?"未开始":FS.paused?"已暂停":FS.endTs?mmss(Math.max(0,Math.round((FS.endTs-Date.now())/1000))):"待完成";
  const row=(st,i,cls)=>`<div class="fstep ${cls}" id="step-${i}"><div class="fhead"><div class="n">${cls==="done"?"✓":i+1}</div><div class="ft">${esc(st.t)}</div><div class="fd">${st.dur?mmss(st.dur):""}</div></div>`;
  let list="";
  for(let i=0;i<v.steps.length;i++){const st=v.steps[i];
   if(i===FS.idx){
    if(expired){list+=row(st,i,"exp")+`<div class="cd">⏰ 时间到</div><div class="meta">${esc(st.why||"　")}</div><button class="btn primary" style="width:100%;margin-top:8px" onclick="ackFlow()">${i>=v.steps.length-1?"✅ 完成":"知道了，下一步 ▶"}</button></div>`}
-   else{list+=row(st,i,"cur")+`<div class="cd ${FS.paused?"paused":""}" id="cd">${FS.paused?"已暂停":"--:--"}</div>`+(st.why?`<div class="meta">${esc(st.why)}</div>`:"")+
-    (FS.paused?`<div class="btnrow"><button class="btn primary" onclick="resumeFlow()">▶ 继续</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div>`:
-     st.dur&&FS.endTs?`<div class="btnrow"><button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div>`:
+   else if(!FS.run){list+=row(st,i,"cur")+`<div class="cd idle">未开始</div>`+(st.why?`<div class="meta">${esc(st.why)}</div>`:"")+
+    (st.dur?`<button class="btn primary" style="width:100%;margin-top:8px" onclick="startStep()">▶ 开始这一步</button><button class="btn ghost" style="width:100%;margin-top:8px" onclick="stepDone()">⏭ 跳过此步</button>`:
+     `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">✓ 完成</button>`)+`</div>`}
+   else if(FS.paused){list+=row(st,i,"cur")+`<div class="cd paused">已暂停</div>`+(st.why?`<div class="meta">${esc(st.why)}</div>`:"")+
+    `<div class="btnrow"><button class="btn primary" onclick="resumeFlow()">▶ 继续</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div></div>`}
+   else{list+=row(st,i,"cur")+`<div class="cd" id="cd">${st.dur?"--:--":"进行中"}</div>`+(st.why?`<div class="meta">${esc(st.why)}</div>`:"")+
+    (st.dur?`<div class="btnrow"><button class="btn ghost" onclick="pauseFlow()">⏸ 暂停</button><button class="btn ghost" onclick="stepDone()">✓ 提前完成</button></div>`:
      `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">✓ 完成</button>`)+`</div>`}}
   else if(browsing&&i===viewIdx){list+=`<div class="fstep view" id="step-${i}" onclick="backCur()"><div class="fhead"><div class="n">${i+1}</div><div class="ft">${esc(st.t)}</div><div class="fd">查看中 ×</div></div><div class="meta">${st.dur?"建议 "+mmss(st.dur)+" · ":""}${esc(st.why||"　")}</div><div class="nowmini">⏱ 当前在第 ${FS.idx+1} 步 · ${remainTxt} — 点此回到当前</div></div>`}
   else{list+=row(st,i,i<FS.idx?"done":"fut")+`</div>`}}
@@ -305,21 +310,21 @@ window.navPrev=()=>{if(!FS)return;const n=Math.max(0,(FV===null?FS.idx:FV)-1);FV
 window.navNext=()=>{if(!FS)return;const v=FLOWS.find(x=>x.id===FS.fid).variants.find(x=>x.id===FS.vid);const n=Math.min(v.steps.length-1,(FV===null?FS.idx:FV)+1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.backCur=()=>{FV=null;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.ackFlow=()=>{if(!FS)return;stopRing();stepDone()};
-function armStep(){const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
- FV=null;FEXP=false;FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;setFlow(FS)}
+window.startStep=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
+ FS.run=true;FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
 window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.find(x=>x.id===curVid);
  if(getFlow()&&!confirm("放弃上一次未完成的流程？"))return;
- FS={fid:fid,vid:v.id,idx:0,endTs:v.steps[0].dur>0?Date.now()+v.steps[0].dur*1000:null,paused:false,remain:0,startedTs:Date.now()};
+ FS={fid:fid,vid:v.id,idx:0,run:false,endTs:null,paused:false,remain:0,startedTs:Date.now()};
  FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
 window.pickVid=id=>{curVid=id;renderFlow(location.hash.slice(2).split("/")[1])};
 window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
 window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
-window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;armStep();renderFlowRun(fl)};
+window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
 window.abortFlow=()=>{if(!confirm("确定放弃？"))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");nav("#/")};
 window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
  lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
- FS.idx++;FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
- armStep();renderFlowRun(fl)};
+ FS.idx++;stopRing();FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
+ FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
 function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle("Memo · 关键时刻留证");setFlow(null);
  const fl=FLOWS.find(x=>x.id===lastFlow.fid);const proof=fl&&fl.ev;
  header("完成 ✅",true);
@@ -335,6 +340,7 @@ window.saveFlowRec=()=>{const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random(
  if(setRecs([...getRecs(),rec]))nav("#/r/"+rec.id)};
 function tick(){if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const cur=v.steps[FS.idx];
  if(FS.paused){setTitle("⏸ 已暂停 · "+fl.title);return}
+ if(!FS.run){setTitle(cur.t+"（未开始） · "+fl.title);return}
  if(FS.endTs){const s=Math.round((FS.endTs-Date.now())/1000);
   if(s<=0){setTitle("⏰ 时间到 · "+fl.title);if($("#cd"))renderFlowRun(fl);return}
   setTitle(mmss(s)+" · "+cur.t+" | Memo");const el=$("#cd");if(el)el.textContent=mmss(s)}
