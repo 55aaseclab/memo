@@ -162,7 +162,23 @@ const SCENES=[
  {t:"提前一站起身到后门",ph:false,why:""},
  {t:"回头看座位、脚下、窗沿",ph:false,why:"手机和雨伞是公交遗失物前两名"},
  {t:"确认刷卡扣费成功",ph:false,why:"异常扣费当场截图，事后难举证"},
- {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]}
+ {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]},
+{id:"air-in",cat:"✈️ 飞机",em:"🎫",title:"登机前 10 分钟",sub:"证件、充电宝、液体三关",items:[
+ {t:"证件与登机牌拿在手上，别塞包底",ph:false,why:"登机口要二次核验"},
+ {t:"充电宝、证件、贵重一律随身，充电宝绝不上托运",ph:false,why:"托运充电宝违规，查到整箱开箱"},
+ {t:"随身液体每瓶 ≤100ml，超的现在塞托运箱",ph:false,why:"安检口扔东西最亏"},
+ {t:"登机口关闭前 15 分钟必须到（国内）",ph:false,why:"晚 1 分钟机票作废"},
+ {t:"起降前先上洗手间",ph:false,why:"滑行和起降不让去"}]},
+{id:"air-mid",cat:"✈️ 飞机",em:"🛋",title:"飞行中",sub:"安全与舒适各两件事",items:[
+ {t:"全程系安全带",ph:false,why:"晴空颠簸不打招呼，伤都发生在解开的瞬间"},
+ {t:"起降：椅背调直、遮光板打开、小桌板收起",ph:false,why:"撤离速度的硬要求"},
+ {t:"耳压不适：吞咽、打哈欠或捏鼻鼓气",ph:false,why:""},
+ {t:"长途每 2 小时起身走动 + 多喝水",ph:false,why:"久坐是深静脉血栓主因"}]},
+{id:"air-out",cat:"✈️ 飞机",em:"🛄",title:"下飞机前 1 分钟",sub:"别落东西，转机别慌",items:[
+ {t:"回头看座位口袋、前方口袋、脚下",ph:false,why:"耳机、护照是航班遗失物前两名"},
+ {t:"充电宝别插在座椅 USB 上就走",ph:false,why:""},
+ {t:"行李票 / 转盘号拍一张",ph:true,why:"丢行李与转机的唯一凭据"},
+ {t:"转机衔接不足 90 分钟直接找地服",ph:false,why:""}]}
 ];
 const FLOWS=[
  {id:"noodle",cat:"🍳 烹饪",em:"🍜",title:"煮面",sub:"跟时间线走，到点叫你",ev:false,
@@ -253,8 +269,8 @@ function banner(){if(isStandalone)return"";if(isWeChat)return'<div class="banner
 function hideA2hs(){setPref("a2hsHide",Date.now());route()}
 window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
 window.hideA2hs=hideA2hs;
-const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
-const TOPS=[{id:"travel",em:"🧳",name:"出行",cats:["hotel","car","taxi","bus"]},{id:"cook",em:"🍳",name:"烹饪",cats:["cook"]}];
+const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"air",label:"✈️ 飞机",name:"飞机"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
+const TOPS=[{id:"travel",em:"🧳",name:"出行",cats:["hotel","car","taxi","bus","air"]},{id:"cook",em:"🍳",name:"烹饪",cats:["cook"]}];
 const LS_FLOW="memo.flow.v1";
 const getFlow=()=>{try{const f=JSON.parse(localStorage.getItem(LS_FLOW)||"null");if(f&&f.run===undefined)f.run=!!f.endTs;return f}catch(e){return null}};
 const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
