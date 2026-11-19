@@ -1,4 +1,4 @@
-const CACHE = "memo-v0.5.8";
+const CACHE = "memo-v0.5.9";
 const ASSETS = ["./", "./index.html", "./records-client.js"];
 const shellURLs = new Set(ASSETS.map(path => new URL(path, self.registration.scope).href));
 self.addEventListener("install", e => {

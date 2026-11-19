@@ -1,6 +1,6 @@
 # Memo roadmap
 
-V0.5.8 · 19 November 2026 · [简体中文](ROADMAP.md)
+V0.5.9 · 19 November 2026 · [简体中文](ROADMAP.md)
 
 ## V0.5.4 · Workbench installation
 
@@ -50,7 +50,7 @@ Open scenes with the keyboard, check items and verify photo-preview dismissal
 and focus restoration. Check that background record loads retain the current
 checklist selection. Simulate a guide request failure and retry.
 
-## V0.5.8 · English and Simplified Chinese
+## V0.5.9 · English and Simplified Chinese
 
 Release both languages together with English first. Check the default,
 the switch, persistence and user-authored text. The control on the home
@@ -59,3 +59,9 @@ screen changes the language of the interface and built-in instructions.
 ## Built-in distribution
 
 Publish the native application and its scoped data API as a pinned Praxis app. A fresh installation starts with empty private storage. Public source and synthetic tests ship independently of host configuration and records.
+
+## Praxis provider / 工作台供数
+
+Publish the app-owned card and data-source contract. Verify synthetic authorized records, native links, stable revisions, empty/error separation and metadata resolution. Keep storage keys, business records and video provisioning outside this module.
+
+发布由应用维护的卡片与数据源合同，使用合成授权记录验证原生入口、稳定版本、空态与错误区分及元数据解析。供数模块不接触密钥、真实业务记录或视频引擎安装。

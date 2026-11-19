@@ -126,7 +126,7 @@ input.snap{display:none}
 <input type="file" id="snap" class="snap" accept="image/*" capture="environment">
 <script id="memo-backup">
 const MemoBackup=(()=>{
- const version="0.5.8",keys=["memo.records.v1","memo.prefs.v1","memo.flow.v1"];
+ const version="0.5.9",keys=["memo.records.v1","memo.prefs.v1","memo.flow.v1"];
  const maxBytes=10*1024*1024,maxPhotoBytes=2*1024*1024;
  const fail=(message,code="INVALID")=>{const error=new Error(message);error.code=code;throw error};
  const check=(condition,message)=>{if(!condition)fail(message)};

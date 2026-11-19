@@ -1,11 +1,14 @@
 {
   "name": "memo",
   "private": true,
-  "version": "0.5.8",
+  "version": "0.5.9",
   "type": "module",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "start": "node src/main.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:provider": "node --test provider-tests/praxis-provider.check.mjs"
   }
 }

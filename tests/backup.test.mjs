@@ -8,7 +8,7 @@ test('exports a versioned empty backup without changing storage', () => {
   const storage = new MemoryStorage();
   const result = JSON.parse(backup.encode(storage, catalog, new Date(now)));
   assert.equal(result.schemaVersion, 1);
-  assert.equal(result.appVersion, '0.5.8');
+  assert.equal(result.appVersion, '0.5.9');
   assert.deepEqual(result.data, { records: [], prefs: {}, flow: null });
   assert.deepEqual(storage.snapshot(), {});
 });
@@ -124,8 +124,8 @@ test('all inline scripts parse and the service worker follows the PRD version', 
   for (const script of scripts) assert.doesNotThrow(() => new vm.Script(script));
   const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   const prd = readFileSync(new URL('../docs/Memo_PRD.md', import.meta.url), 'utf8');
-  assert.match(sw, /memo-v0\.5\.8/);
-  assert.match(prd, /\| V0\.5\.8 \|/);
+  assert.match(sw, /memo-v0\.5\.9/);
+  assert.match(prd, /\| V0\.5\.9 \|/);
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.doesNotMatch(html, /rel=["'](?:manifest|apple-touch-icon)|name=["']apple-mobile-web-app-/);
   assert.doesNotMatch(html, /hideA2hs|添加到主屏幕/);

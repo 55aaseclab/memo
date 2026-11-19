@@ -6,7 +6,7 @@ const source = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 function worker() {
   const events = new Map(), deleted = [], written = [];
   const caches = {
-    keys: async () => ['memo-v0.5.4', 'memo-v0.5.5', 'memo-v0.5.8', 'travel-assets', 'knowledge-shell'],
+    keys: async () => ['memo-v0.5.4', 'memo-v0.5.5', 'memo-v0.5.8', 'memo-v0.5.9', 'travel-assets', 'knowledge-shell'],
     delete: async name => { deleted.push(name); return true; },
     open: async name => ({ put: async request => written.push({ name, url: request.url }), match: async () => undefined }),
     match: async () => undefined,
@@ -26,12 +26,12 @@ test('service worker never handles private APIs, authentication, query URLs or o
   events.get('fetch')({ request: { method: 'GET', url: 'https://example.test/apps/memo/' }, respondWith: value => { response = value; } });
   assert.equal((await response).ok, true);
   await new Promise(resolve => setImmediate(resolve));
-  assert.deepEqual(written, [{ name: 'memo-v0.5.8', url: 'https://example.test/apps/memo/' }]);
+  assert.deepEqual(written, [{ name: 'memo-v0.5.9', url: 'https://example.test/apps/memo/' }]);
 });
 test('activation removes old Memo caches without deleting other app caches', async () => {
   const { events, deleted } = worker();
   let completed;
   events.get('activate')({ waitUntil: value => { completed = value; } });
   await completed;
-  assert.deepEqual(deleted, ['memo-v0.5.4', 'memo-v0.5.5']);
+  assert.deepEqual(deleted, ['memo-v0.5.4', 'memo-v0.5.5', 'memo-v0.5.8']);
 });

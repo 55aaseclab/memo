@@ -39,3 +39,7 @@ Playwright. Software and PRD versions are aligned with the service-worker
 cache version. Update the PRD before changing product behavior.
 
 [Product requirements](docs/PRD.en.md) · [Roadmap](docs/ROADMAP.md)
+
+## Praxis integration
+
+The app-owned [provider contract](docs/PRAXIS-PROVIDER.md) supplies authorized source-backed cards and data-source metadata without exposing a new HTTP endpoint. Run `npm run test:provider` for the isolated provider checks.
