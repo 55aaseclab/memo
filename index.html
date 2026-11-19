@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Memo</title>
+<meta name="description" content="管好人生万件事：住店、租车、打车、公交、烹饪。关键时刻打开，60 秒做完，带走凭证。照片与凭证仅保存在本机。">
+<meta name="theme-color" content="#3451b2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233451b2'/%3E%3Ctext x='32' y='42' font-size='26' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
+<style>
+:root{--brand:#3451b2;--brand2:#3a5ccc;--bg:#f6f7fb;--card:#fff;--t1:#1f2329;--t2:#5c6470;--t3:#9096a0;--line:#e7e9ef;--green:#18794e;--red:#b8272c;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--t1);font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+#app{max-width:520px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:calc(10px + var(--safe-t)) 16px 12px;font-weight:600;font-size:17px;display:flex;align-items:center;gap:8px}
+header .ref{background:none;border:0;color:#fff;font-size:18px;padding:2px 6px;cursor:pointer}
+header .ref{margin-left:2px}
+@keyframes refspin{to{transform:rotate(360deg)}}
+header .ref.spin{animation:refspin .45s linear}
+header .back{background:none;border:0;color:#fff;font-size:20px;padding:4px 8px;margin-left:-8px;cursor:pointer}
+header .sub{font-weight:400;font-size:12px;opacity:.85;margin-left:auto}
+main{flex:1;padding:14px 14px calc(88px + var(--safe-b))}
+.banner{background:#fff7e6;border:1px solid #ffe2a8;color:#7a5200;border-radius:10px;padding:9px 12px;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.banner button{margin-left:auto;border:0;background:none;color:#7a5200;font-size:16px;cursor:pointer;padding:0 2px}
+.banner.warn{background:#fdecec;border-color:#f5c2c2;color:#8f2326}
+.cat{margin:16px 2px 8px;font-size:13px;color:var(--t2);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:8px}
+.card.ring{border-color:var(--red);background:var(--red-soft);animation:ringblink 1s ease-in-out infinite}
+.step.viewed{border-left:3px solid var(--brand);padding-left:8px;background:#f4f6fd;border-radius:6px}
+@keyframes ringblink{50%{background:#fbd5d7}}
+.grid.big{gap:12px;margin-top:4px}
+a.tile,a.rec,a.banner.run{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;transition:transform .06s}
+.tile.big{padding:26px 16px;border-radius:16px}
+.tile.big .em{font-size:34px}
+.tile.big .t{font-size:17px;margin-top:8px}
+.tile.big .s{font-size:12px}
+.tile:active{transform:scale(.97)}
+.tile .em{font-size:22px}
+.tile .t{font-weight:600;margin-top:6px;font-size:15px}
+.tile .s{font-size:12px;color:var(--t3);margin-top:2px;line-height:1.45}
+.footbtns{position:fixed;bottom:0;left:0;right:0;padding:10px 14px calc(12px + var(--safe-b));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 30%);max-width:520px;margin:0 auto}
+.btn{flex:1;border:0;border-radius:12px;padding:13px 0;font-size:15px;font-weight:600;cursor:pointer}
+.btn:active{opacity:.85}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.ghost{background:var(--card);color:var(--t1);border:1px solid var(--line);position:relative}
+.btn.ghost .badge{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:9px;font-size:11px;min-width:18px;line-height:18px;padding:0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.item{display:flex;align-items:flex-start;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-of-type{border-bottom:0}
+.item .check-row{display:flex;align-items:flex-start;gap:10px;min-height:44px;flex:1;cursor:pointer}.check-row input{width:21px;height:21px;flex:none;margin:2px 0;accent-color:var(--green)}.check-row .why{display:block}
+.item .cb{width:21px;height:21px;border:2px solid #c3c8d4;border-radius:6px;flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+.item.done .cb{background:var(--green);border-color:var(--green)}
+.item.done .txt{color:var(--t3);text-decoration:line-through}
+.item .txt{flex:1}
+.item .cam{border:0;background:#eef1fb;color:var(--brand);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;flex:none}
+.item .why{font-size:12px;color:var(--t3);margin-top:4px}
+.thumb{width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--line)}
+.nophoto{font-size:12px;color:var(--t3);margin-top:6px}
+h2{font-size:18px;margin:2px 0 4px}
+.sub2{color:var(--t2);font-size:13px;margin-bottom:10px}
+.meta{font-size:12px;color:var(--t3);margin-bottom:8px}
+.rec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.rec .em{font-size:20px}
+.rec .t{font-weight:600;font-size:15px}
+.rec .m{font-size:12px;color:var(--t3)}
+.photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.photogrid button{padding:0;border:0;background:none;cursor:zoom-in}
+.photogrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.lightbox{border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;box-sizing:border-box;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.lightbox button{position:absolute;right:12px;top:12px;min-height:44px;padding:0 16px}
+.lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+.step{display:flex;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.step:last-child{border-bottom:0}
+.step .n{flex:none;width:22px;height:22px;border-radius:50%;background:#eef1fb;color:var(--brand);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.emerg{background:#fdecec;color:#8f2326;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px}
+.guide-list .tile{font:inherit;text-align:left;color:var(--t1)}
+.guide h2{margin-bottom:14px}.guide h3{font-size:15px;margin:0 0 8px}.guide ul{margin:0;padding-left:21px}.guide li{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.privacy{font-size:11px;color:var(--t3);text-align:center;margin-top:14px}
+.empty{text-align:center;color:var(--t3);padding:40px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + var(--safe-b));background:rgba(31,35,41,.92);color:#fff;padding:9px 16px;border-radius:10px;font-size:13px;z-index:60;max-width:80vw}
+input.snap{display:none}
+.seg{display:flex;gap:8px;margin-bottom:12px}
+.segbtn{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 0;font-size:14px;font-weight:600;color:var(--t2);cursor:pointer}
+.segbtn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.dur{color:var(--brand);font-weight:600}
+.cd{font-size:64px;font-weight:800;color:var(--t1);text-align:center;margin:10px 0;font-variant-numeric:tabular-nums}
+.cd.paused{color:#915930;font-size:24px}
+.cd.manual{color:var(--t2);font-size:20px}
+.cd.idle{color:var(--t3);font-size:28px}
+.step.done .n{background:var(--green-soft);color:var(--green)}
+.step.cur{background:#eef1fb;margin:0 -14px;padding:10px 14px}
+.step.cur .n{background:var(--brand);color:#fff}
+.banner.run{background:#e8f0fe;border-color:#c3d0f5;color:#2a4bb3;cursor:pointer}
+.banner.run button{display:none}
+.flist{display:flex;flex-direction:column;gap:8px}
+.fstep{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+.fstep .fhead{display:flex;align-items:center;gap:10px}
+.fstep .n{width:24px;height:24px;border-radius:50%;background:var(--gray-soft);color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.fstep .ft{flex:1;font-weight:600;font-size:15px}
+.fstep .fd{font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
+.fstep.done .n{background:var(--green-soft);color:var(--green)}
+.fstep.fut{opacity:.62}
+.fstep.cur{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.fstep.cur .n{background:var(--brand);color:#fff}
+.fstep.cur .cd{margin:10px 0 6px}
+.fstep.view{border-style:dashed;border-color:var(--brand);cursor:pointer}
+.fstep.view .n{background:var(--brand-soft);color:var(--brand)}
+.fstep.view .nowmini{margin-top:8px;font-size:12px;color:var(--brand);background:var(--brand-soft);border-radius:8px;padding:6px 8px}
+.fstep.exp{border-color:var(--red);background:var(--red-soft);animation:ringblink 1s ease-in-out infinite}
+.fstep.exp .n{background:var(--red);color:#fff}
+.fstep.exp .cd{font-size:40px;color:var(--red)}
+.btnrow{display:flex;gap:8px;margin-top:8px}
+.btnrow .btn{padding:10px 0;font-size:14px}
+.locale{font:inherit;min-height:44px;padding:0 10px;cursor:pointer;color:var(--t2);background:transparent;border:0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hd"></header>
+  <main id="main"></main>
+</div>
+<div id="extra"></div>
+<input type="file" id="snap" class="snap" accept="image/*" capture="environment">
+<script id="memo-backup">
+const MemoBackup=(()=>{
+ const version="0.5.8",keys=["memo.records.v1","memo.prefs.v1","memo.flow.v1"];
+ const maxBytes=10*1024*1024,maxPhotoBytes=2*1024*1024;
+ const fail=(message,code="INVALID")=>{const error=new Error(message);error.code=code;throw error};
+ const check=(condition,message)=>{if(!condition)fail(message)};
+ const object=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
+ const text=(value,max=2000)=>typeof value==="string"&&value.length>0&&value.length<=max&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value);
+ const timestamp=value=>Number.isSafeInteger(value)&&value>=0&&value<=8640000000000000;
+ const fields=(value,allowed)=>check(Object.keys(value).every(key=>allowed.includes(key)),"Unexpected backup field");
+ function photo(value){
+  if(value===null)return;
+  check(typeof value==="string"&&value.length<=Math.ceil(maxPhotoBytes/3)*4+40,"Invalid photo size");
+  const match=/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  check(match&&match[2].length%4===0,"Invalid photo data URL");
+  let bytes;try{bytes=atob(match[2])}catch(error){fail("Invalid photo base64")}
+  check(bytes.length>0&&bytes.length<=maxPhotoBytes,"Invalid photo size");
+  const byte=index=>bytes.charCodeAt(index);
+  const valid=match[1]==="jpeg"?byte(0)===255&&byte(1)===216&&byte(2)===255:
+   match[1]==="png"?bytes.slice(0,8)==="\x89PNG\r\n\x1a\n":bytes.slice(0,4)==="RIFF"&&bytes.slice(8,12)==="WEBP";
+  check(valid,"Photo signature does not match its type");
+ }
+ function prefs(value,catalog){
+  check(object(value)&&Object.keys(value).length<=100,"Invalid preferences");
+  function json(item,depth){
+   check(depth<=4,"Preferences are too deeply nested");
+   if(item===null||typeof item==="boolean")return;
+   if(typeof item==="number"){check(Number.isFinite(item),"Invalid preference number");return}
+   if(typeof item==="string"){check(item.length<=2000,"Preference is too long");return}
+   check(Array.isArray(item)||object(item),"Invalid preference value");
+   check(Object.keys(item).length<=100,"Too many preference entries");
+   for(const key of Object.keys(item)){
+    check(/^[A-Za-z0-9_-]{1,100}$/.test(key)&&!["__proto__","constructor","prototype"].includes(key),"Invalid preference key");
+    json(item[key],depth+1);
+   }
+  }
+  json(value,0);
+  if(value.a2hsHide!==undefined)check(timestamp(value.a2hsHide),"Invalid banner preference");
+  for(const flow of catalog){const variant=value["fv_"+flow.id];if(variant!==undefined)check(flow.variants.some(item=>item.id===variant),"Unknown preferred variant")}
+ }
+ function flow(value,catalog){
+  if(value===null)return;
+  check(object(value),"Invalid flow");
+  fields(value,["fid","vid","idx","run","endTs","paused","remain","startedTs"]);
+  const definition=catalog.find(item=>item.id===value.fid);
+  const variant=definition&&definition.variants.find(item=>item.id===value.vid);
+  check(variant&&Number.isInteger(value.idx)&&value.idx>=0&&value.idx<variant.steps.length,"Unknown flow step");
+  check(timestamp(value.startedTs),"Invalid flow start time");
+  check(value.endTs===null||timestamp(value.endTs),"Invalid flow deadline");
+  check(value.run===undefined||typeof value.run==="boolean","Invalid flow run state");
+  check(value.paused===undefined||typeof value.paused==="boolean","Invalid flow pause state");
+  check(value.remain===undefined||(Number.isSafeInteger(value.remain)&&value.remain>=0&&value.remain<=8640000000000),"Invalid flow remaining time");
+  const running=value.run===undefined?!!value.endTs:value.run;
+  check(running||(!value.endTs&&!value.paused),"Inconsistent flow state");
+  if(value.paused)check(running&&value.endTs!==null&&value.remain!==undefined,"Incomplete paused flow");
+ }
+ function parse(source,catalog){
+  check(typeof source==="string"&&new TextEncoder().encode(source).length<=maxBytes,"Backup exceeds the file limit");
+  let backup;try{backup=JSON.parse(source)}catch(error){fail("Backup is not valid JSON")}
+  check(object(backup)&&backup.format==="memo-backup"&&backup.schemaVersion===1,"Unsupported backup format");
+  fields(backup,["format","schemaVersion","appVersion","exportedAt","data"]);
+  check(typeof backup.appVersion==="string"&&/^\d+\.\d+\.\d+$/.test(backup.appVersion),"Invalid app version");
+  check(typeof backup.exportedAt==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(backup.exportedAt)&&Number.isFinite(Date.parse(backup.exportedAt)),"Invalid export time");
+  const data=backup.data;check(object(data),"Invalid backup data");fields(data,["records","prefs","flow"]);
+  check(Array.isArray(data.records)&&data.records.length<=5000,"Invalid records");
+  const ids=new Set();
+  for(const record of data.records){
+   check(object(record),"Invalid record");fields(record,["id","sceneId","kind","ts","items"]);
+   check(typeof record.id==="string"&&/^[A-Za-z0-9_-]{1,128}$/.test(record.id)&&!ids.has(record.id),"Invalid or duplicate record ID");ids.add(record.id);
+   check(text(record.sceneId,200)&&!/[<>"']/.test(record.sceneId),"Invalid scene ID");
+   check(record.kind===undefined||["memo","proof"].includes(record.kind),"Invalid record kind");
+   check(timestamp(record.ts),"Invalid record time");
+   check(Array.isArray(record.items)&&record.items.length>0&&record.items.length<=100,"Invalid record items");
+   for(const item of record.items){
+    check(object(item),"Invalid record item");fields(item,["t","done","photo"]);
+    check(text(item.t)&&typeof item.done==="boolean","Invalid record item fields");photo(item.photo);
+   }
+  }
+  prefs(data.prefs,catalog);flow(data.flow,catalog);return backup;
+ }
+ function encode(storage,catalog,now=new Date()){
+  let data;try{data={records:JSON.parse(storage.getItem(keys[0])||"[]"),prefs:JSON.parse(storage.getItem(keys[1])||"{}"),flow:JSON.parse(storage.getItem(keys[2])||"null")}}catch(error){fail("Local data cannot be read","STORAGE")}
+  const source=JSON.stringify({format:"memo-backup",schemaVersion:1,appVersion:version,exportedAt:now.toISOString(),data});
+  parse(source,catalog);return source;
+ }
+ function restore(storage,input,catalog,now=Date.now()){
+  const backup=parse(JSON.stringify(input),catalog),data=backup.data;
+  if(data.flow){
+   const state=data.flow,running=state.run===undefined?!!state.endTs:state.run;
+   if(running&&state.endTs!==null){
+    state.remain=state.paused?state.remain:Math.max(0,Math.round((state.endTs-now)/1000));
+    state.run=true;state.paused=true;
+   }else{state.run=false;state.paused=false;state.remain=0}
+  }
+  let previous;try{previous=keys.map(key=>storage.getItem(key))}catch(error){fail("Local storage is unavailable","STORAGE")}
+  const values=[JSON.stringify(data.records),JSON.stringify(data.prefs),data.flow?JSON.stringify(data.flow):null],written=[];
+  try{
+   keys.forEach((key,index)=>{values[index]===null?storage.removeItem(key):storage.setItem(key,values[index]);written.push(index)});
+  }catch(error){
+   let recovered=true;
+   for(const index of written)try{storage.removeItem(keys[index])}catch(rollbackError){recovered=false}
+   for(const index of written)try{previous[index]===null?storage.removeItem(keys[index]):storage.setItem(keys[index],previous[index])}catch(rollbackError){recovered=false}
+   fail(recovered?"Restore failed; previous storage was preserved":"Restore failed and storage rollback is unavailable",recovered?"STORAGE":"ROLLBACK");
+  }
+  return data;
+ }
+ return {version,keys,maxBytes,parse,encode,restore};
+})();
+</script>
+<script src="./records-client.js"></script>
+<script>
+const SCENES=[
+{id:"hotel-in",cat:"🏨 住店",em:"🛏",title:"进房 60 秒安检",sub:"先做这 5 件事再放行李",items:[
+ {t:"反锁 + 扣上防盗链",ph:false,why:"多数房间纠纷与安全事件止于门锁这一步"},
+ {t:"关灯，手机拍照扫一圈找红点",ph:true,why:"针孔摄像头红外补光下会泛红点，重点查床对面的插座、烟感、摆件"},
+ {t:"床品看一眼：头发、血渍，不满意当场换房",ph:false,why:"当场换房成本最低，半夜再换基本没房"},
+ {t:"猫眼有无遮挡、门缝有无反常",ph:false,why:""},
+ {t:"贵重物品进保险箱或收好",ph:false,why:""}]},
+{id:"hotel-out",cat:"🏨 住店",em:"🧳",title:"退房前 2 分钟",sub:"别落下东西，押金别被乱扣",items:[
+ {t:"浴室、抽屉、床底、衣柜扫一遍",ph:false,why:""},
+ {t:"充电器、数据线、护照、现金（最高频遗失）",ph:false,why:"前台遗留物统计里充电器常年第一"},
+ {t:"房间四角各拍一张",ph:true,why:"防事后'你弄坏了东西'的扯皮"},
+ {t:"押金条拍照，问清退款到账日",ph:true,why:"有凭据+到账日期，超期可直接找平台"}]},
+{id:"car-in",cat:"🚗 租车",em:"🔑",title:"提车 5 分钟",sub:"他的记录是他的，你的记录才是你的",items:[
+ {t:"绕车一圈，视频/连拍全身",ph:true,why:"水印时间证明拍摄于提车时"},
+ {t:"已有划痕对准拍近照",ph:true,why:"纠纷 90% 出在旧伤新伤说不清"},
+ {t:"油表、里程拍照",ph:true,why:"还车油量争议的对冲凭据"},
+ {t:"让店员在单据上书面确认已有划痕，不确认就换车",ph:false,why:"口头'记了'无效，白纸黑字才算"},
+ {t:"免赔额、保险条款拍照",ph:false,why:"出险时才知道自己掏多少"}]},
+{id:"car-out",cat:"🚗 租车",em:"📤",title:"还车前 3 分钟",sub:"核对完再签字",items:[
+ {t:"再绕车拍一圈",ph:true,why:"证明还车时状态"},
+ {t:"加油小票拍照留存",ph:true,why:"油量争议的直接证据"},
+ {t:"核对结算单：车损/油费/超时，逐项确认再签字",ph:false,why:"签了字再翻案极难"},
+ {t:"拿回押金预授权解除截图",ph:false,why:"预授权通常 7-15 天解冻，到期没解就找平台"}]},
+{id:"taxi-in",cat:"🚕 打车",em:"🚪",title:"上车 10 秒",sub:"安全动作做齐",items:[
+ {t:"核对车牌、车型、司机人脸",ph:false,why:"人车不符直接取消，坐了更麻烦"},
+ {t:"行程分享给家人",ph:false,why:"平台一键分享，别嫌麻烦"},
+ {t:"坐后排",ph:false,why:""}]},
+ {id:"taxi-out",cat:"🚕 打车",em:"👋",title:"下车前 3 秒",sub:"过了这秒，东西就没了",items:[
+ {t:"回头看后座、脚下、缝隙",ph:false,why:"打车遗失物最高发就是这 3 秒"},
+ {t:"核对计费再下车",ph:false,why:""},
+ {t:"索要/保存电子行程单",ph:true,why:"报销+遗失找回+纠纷的全用得上"}]},
+{id:"bus-in",cat:"🚌 公交",em:"🚏",title:"上车 10 秒",sub:"方向、钱码、背包三件事",items:[
+ {t:"看清车头终点站再上，别坐反方向",ph:false,why:"反方向一坐就是半小时"},
+ {t:"付款码/交通卡提前调出",ph:false,why:"别堵在门口翻手机"},
+ {t:"背包转到身前，手机放内袋",ph:false,why:"高峰时段扒窃高发"},
+ {t:"拍下车牌或车身编号",ph:true,why:"公交没有实名行程，车牌+时间是失物找回的唯一线索"}]},
+{id:"bus-out",cat:"🚌 公交",em:"🚉",title:"下车前 3 秒",sub:"别坐过站，别落东西",items:[
+ {t:"提前一站起身到后门",ph:false,why:""},
+ {t:"回头看座位、脚下、窗沿",ph:false,why:"手机和雨伞是公交遗失物前两名"},
+ {t:"确认刷卡扣费成功",ph:false,why:"异常扣费当场截图，事后难举证"},
+ {t:"等车开走再过马路",ph:false,why:"车身挡住的是电动车的盲区"}]},
+{id:"air-in",cat:"✈️ 飞机",em:"🎫",title:"登机前 10 分钟",sub:"证件、充电宝、液体三关",items:[
+ {t:"证件与登机牌拿在手上，别塞包底",ph:false,why:"登机口要二次核验"},
+ {t:"充电宝、证件、贵重一律随身，充电宝绝不上托运",ph:false,why:"托运充电宝违规，查到整箱开箱"},
+ {t:"随身液体每瓶 ≤100ml，超的现在塞托运箱",ph:false,why:"安检口扔东西最亏"},
+ {t:"登机口关闭前 15 分钟必须到（国内）",ph:false,why:"晚 1 分钟机票作废"},
+ {t:"起降前先上洗手间",ph:false,why:"滑行和起降不让去"}]},
+{id:"air-mid",cat:"✈️ 飞机",em:"🛋",title:"飞行中",sub:"安全与舒适各两件事",items:[
+ {t:"全程系安全带",ph:false,why:"晴空颠簸不打招呼，伤都发生在解开的瞬间"},
+ {t:"起降：椅背调直、遮光板打开、小桌板收起",ph:false,why:"撤离速度的硬要求"},
+ {t:"耳压不适：吞咽、打哈欠或捏鼻鼓气",ph:false,why:""},
+ {t:"长途每 2 小时起身走动 + 多喝水",ph:false,why:"久坐是深静脉血栓主因"}]},
+{id:"air-out",cat:"✈️ 飞机",em:"🛄",title:"下飞机前 1 分钟",sub:"别落东西，转机别慌",items:[
+ {t:"回头看座位口袋、前方口袋、脚下",ph:false,why:"耳机、护照是航班遗失物前两名"},
+ {t:"充电宝别插在座椅 USB 上就走",ph:false,why:""},
+ {t:"行李票 / 转盘号拍一张",ph:true,why:"丢行李与转机的唯一凭据"},
+ {t:"转机衔接不足 90 分钟直接找地服",ph:false,why:""}]}
+];
+const FLOWS=[
+ {id:"noodle",cat:"🍳 烹饪",em:"🍜",title:"煮面",sub:"跟时间线走，到点叫你",ev:false,
+  variants:[
+   {id:"instant",name:"方便面",steps:[
+    {t:"烧水",dur:180,why:"大火全开，盖盖更快"},
+    {t:"下面饼 + 调料包",dur:0,why:"水全沸再下，面汤不浑"},
+    {t:"煮面",dur:180,why:"中途搅一次防粘"},
+    {t:"关火出锅",dur:0,why:"看一眼火苗确实熄灭"}]},
+   {id:"dried",name:"挂面",steps:[
+    {t:"烧水",dur:240,why:""},
+    {t:"水开下面 + 一撮盐",dur:0,why:"防粘，入底味"},
+    {t:"煮面",dur:360,why:"中途点一次冷水不糊"},
+    {t:"关火焖 30 秒",dur:30,why:"余温焖透面芯"},
+    {t:"出锅",dur:0,why:"看一眼火苗确实熄灭"}]},
+   {id:"thin",name:"龙须面",steps:[
+    {t:"烧水",dur:240,why:""},
+    {t:"下面",dur:0,why:""},
+    {t:"煮 90 秒",dur:90,why:"细面易熟，宁欠勿过"},
+    {t:"关火出锅",dur:0,why:"看一眼火苗确实熄灭"}]}
+  ]},
+ {id:"wash",cat:"🍳 烹饪",em:"🧽",title:"洗碗",sub:"先净后污，收尾擦台",ev:false,
+  variants:[
+   {id:"hand",name:"手洗",steps:[
+    {t:"残渣刮进垃圾桶",dur:0,why:"冲不下去的别硬冲"},
+    {t:"重油锅碗先泡热水",dur:300,why:"泡着的 5 分钟正好擦台面"},
+    {t:"轻油先洗：杯筷勺",dur:0,why:"先净后污，水不脏"},
+    {t:"重油：盘碗锅，热水+洗洁精",dur:0,why:""},
+    {t:"冲净泡沫，沥水架归位",dur:0,why:""},
+    {t:"收尾：台面抹一遍，抹布拧干挂起",dur:0,why:"明天开工不堵心"}]},
+   {id:"dw",name:"洗碗机",steps:[
+    {t:"大残渣刮净",dur:0,why:"现代洗碗机不需要预冲洗"},
+    {t:"装篮：下篮锅盘朝下朝内，上篮杯筷",dur:0,why:"朝下才冲得到"},
+    {t:"查盐 / 亮碟剂余量",dur:0,why:"低了就补，洗不净多半是它"},
+    {t:"选程序并启动",dur:0,why:"重油用强力，错峰用预约"},
+    {t:"运行中——别开它",dur:5400,why:"到点响铃提醒取出；中途离开会挂起，首页能看剩余"},
+    {t:"结束：开门敞晾",dur:600,why:"余温烘干，比擦干卫生"},
+    {t:"取碗 + 清滤网（每周）",dur:0,why:"滤网堵了等于白洗"}]}
+  ]}];
+const INCIDENTS=[
+{id:"deposit",em:"💰",t:"押金被乱扣",cat:["hotel-out","car-out","car-in"],steps:[
+ "当场不签字、不争吵，要求对方出具书面扣款依据（项目+金额+依据条款）",
+ "打开 Memo 档案，调出对应的提车/入住/退房凭证照片",
+ "平台订单页发起申诉，上传凭证；住宿类可同时打 12315 或当地 12345",
+ "全程沟通记录截图存档，别删任何原始照片"]},
+{id:"lost",em:"🔦",t:"东西落下了",cat:["taxi-out","hotel-out","bus-out"],steps:[
+ "先回想最后见到物品的场景（车/房间）",
+ "打车：打开平台行程单 → 联系司机或平台挂失；行程单在 Memo 档案里",
+ "公交：记下线路+车牌（Memo 凭证里有照片）→ 打车队电话或 12345 公交失物登记",
+ "酒店：先打前台，再查订单平台客服；描述柜位可加快查找",
+ "贵重证件丢失：同步挂失补办，别等"]},
+{id:"damage",em:"🚗",t:"车损争议",cat:["car-in","car-out"],steps:[
+ "对比 Memo 里提车/还车两组带时间的照片",
+ "要求对方出示你签字的验车单原件",
+ "不认可的扣款别签结算，书面提出异议",
+ "平台投诉无效时 12315，保留所有沟通记录"]},
+{id:"safe",em:"🚨",t:"人身安全",cat:["hotel-in","taxi-in"],steps:[
+ "紧急情况先打 110 / 120，工具放一边",
+ "换到人多明亮的位置，告知亲友实时位置",
+ "保存好订单与车牌信息交给警方",
+ "事后用 Memo 档案整理时间线备查"]}
+];
+
+function preferredMemoLanguage() {
+  try {
+    if (location.pathname.startsWith('/apps/memo/')) {
+      const shared = document.cookie.match(/(?:^|;\s*)praxis_locale=(en|zh)(?:;|$)/);
+      if (shared) return shared[1];
+      const stored = localStorage.getItem('praxis.locale');
+      if (stored === 'en' || stored === 'zh') return stored;
+    }
+    return localStorage.getItem('memo.locale') === 'zh' ? 'zh' : 'en';
+  } catch { return 'en'; }
+}
+let memoLanguage = preferredMemoLanguage();
+document.documentElement.lang = memoLanguage === 'en' ? 'en' : 'zh-CN';
+const memoText = (english, chinese) => memoLanguage === 'zh' ? chinese : english;
+const memoBuiltIns = new Map([
+  ["🏨 Hotel stays", "🏨 住店"],
+  ["Room check on arrival", "进房 60 秒安检"],
+  ["Five things to check before unpacking", "先做这 5 件事再放行李"],
+  ["Lock the door and fasten the security latch", "反锁 + 扣上防盗链"],
+  ["Check the lock as soon as you arrive.", "多数房间纠纷与安全事件止于门锁这一步"],
+  ["Switch off the lights and look for red lights with your phone camera", "关灯，手机拍照扫一圈找红点"],
+  ["Check fixtures facing the bed, including sockets, smoke alarms and ornaments.", "针孔摄像头红外补光下会泛红点，重点查床对面的插座、烟感、摆件"],
+  ["Check bedding for stains or hair and request clean bedding or another room", "床品看一眼：头发、血渍，不满意当场换房"],
+  ["Ask at check-in while rooms are still available.", "当场换房成本最低，半夜再换基本没房"],
+  ["Check the peephole and look for gaps around the door", "猫眼有无遮挡、门缝有无反常"],
+  ["Secure your valuables or put them in the safe", "贵重物品进保险箱或收好"],
+  ["Before checking out", "退房前 2 分钟"],
+  ["Collect your belongings and document the room", "别落下东西，押金别被乱扣"],
+  ["Check the bathroom, drawers, under the bed and in the wardrobe", "浴室、抽屉、床底、衣柜扫一遍"],
+  ["Check for chargers, cables, your passport and cash", "充电器、数据线、护照、现金（最高频遗失）"],
+  ["Chargers are commonly left at hotel reception.", "前台遗留物统计里充电器常年第一"],
+  ["Photograph each corner of the room", "房间四角各拍一张"],
+  ["Keep a record of its condition at checkout.", "防事后'你弄坏了东西'的扯皮"],
+  ["Photograph the deposit receipt and ask when the refund is due", "押金条拍照，问清退款到账日"],
+  ["Use the receipt and promised date to follow up with the booking service.", "有凭据+到账日期，超期可直接找平台"],
+  ["🚗 Car rental", "🚗 租车"],
+  ["Picking up a rental car", "提车 5 分钟"],
+  ["Keep your own record of its condition", "他的记录是他的，你的记录才是你的"],
+  ["Walk around the vehicle and photograph or film each side", "绕车一圈，视频/连拍全身"],
+  ["A timestamp records the condition at collection.", "水印时间证明拍摄于提车时"],
+  ["Photograph existing scratches up close", "已有划痕对准拍近照"],
+  ["Clear photos help distinguish existing damage from later damage.", "纠纷 90% 出在旧伤新伤说不清"],
+  ["Photograph the fuel gauge and odometer", "油表、里程拍照"],
+  ["Use the photos to resolve fuel charges at return.", "还车油量争议的对冲凭据"],
+  ["Ask the rental desk to note existing scratches in writing or request another car", "让店员在单据上书面确认已有划痕，不确认就换车"],
+  ["Keep a written inspection record.", "口头'记了'无效，白纸黑字才算"],
+  ["Photograph the excess and insurance terms", "免赔额、保险条款拍照"],
+  ["Check how much you may have to pay in a claim.", "出险时才知道自己掏多少"],
+  ["Before returning the car", "还车前 3 分钟"],
+  ["Check the settlement before signing", "核对完再签字"],
+  ["Photograph the car on all sides again", "再绕车拍一圈"],
+  ["Record its condition at return.", "证明还车时状态"],
+  ["Keep a photo of the fuel receipt", "加油小票拍照留存"],
+  ["The receipt can help resolve a fuel dispute.", "油量争议的直接证据"],
+  ["Review damage, fuel and overtime charges before signing", "核对结算单：车损/油费/超时，逐项确认再签字"],
+  ["Resolve disputed items before signing the settlement.", "签了字再翻案极难"],
+  ["Save the confirmation that the deposit hold was released", "拿回押金预授权解除截图"],
+  ["Check the release date with your bank or booking service.", "预授权通常 7-15 天解冻，到期没解就找平台"],
+  ["🚕 Taxi", "🚕 打车"],
+  ["When getting in", "上车 10 秒"],
+  ["Check the vehicle and the trip", "安全动作做齐"],
+  ["Match the plate, vehicle model and driver with the booking", "核对车牌、车型、司机人脸"],
+  ["Cancel if the vehicle or driver does not match.", "人车不符直接取消，坐了更麻烦"],
+  ["Share the trip with someone you trust", "行程分享给家人"],
+  ["Use the platform's trip-sharing feature.", "平台一键分享，别嫌麻烦"],
+  ["Sit in the back seat", "坐后排"],
+  ["Before getting out", "下车前 3 秒"],
+  ["Check your belongings", "过了这秒，东西就没了"],
+  ["Look back at the seat, floor and gaps", "回头看后座、脚下、缝隙"],
+  ["Make the check before the vehicle leaves.", "打车遗失物最高发就是这 3 秒"],
+  ["Check the fare before getting out", "核对计费再下车"],
+  ["Save or request the electronic trip receipt", "索要/保存电子行程单"],
+  ["It helps with expenses, lost property and fare disputes.", "报销+遗失找回+纠纷的全用得上"],
+  ["🚌 Bus", "🚌 公交"],
+  ["Check the destination, ticket and your bag", "方向、钱码、背包三件事"],
+  ["Read the destination before boarding", "看清车头终点站再上，别坐反方向"],
+  ["Confirm the direction before you board.", "反方向一坐就是半小时"],
+  ["Have your travel card or payment code ready", "付款码/交通卡提前调出"],
+  ["Prepare it before reaching the door.", "别堵在门口翻手机"],
+  ["Move your bag to the front and keep your phone in an inside pocket", "背包转到身前，手机放内袋"],
+  ["Keep valuables close in crowded vehicles.", "高峰时段扒窃高发"],
+  ["Note the number plate or fleet number", "拍下车牌或车身编号"],
+  ["The vehicle number and time help identify a trip when reporting a lost item.", "公交没有实名行程，车牌+时间是失物找回的唯一线索"],
+  ["Check your stop and belongings", "别坐过站，别落东西"],
+  ["Move towards the exit one stop before yours", "提前一站起身到后门"],
+  ["Check the seat, floor and windowsill", "回头看座位、脚下、窗沿"],
+  ["Look for small belongings such as a phone or umbrella.", "手机和雨伞是公交遗失物前两名"],
+  ["Check that your fare was recorded", "确认刷卡扣费成功"],
+  ["Take a screenshot if the fare appears incorrect.", "异常扣费当场截图，事后难举证"],
+  ["Wait until the bus leaves before crossing", "等车开走再过马路"],
+  ["A stopped bus can hide approaching traffic.", "车身挡住的是电动车的盲区"],
+  ["✈️ Flights", "✈️ 飞机"],
+  ["Before boarding", "登机前 10 分钟"],
+  ["Check ID, batteries and liquids", "证件、充电宝、液体三关"],
+  ["Keep your identification and boarding pass accessible", "证件与登机牌拿在手上，别塞包底"],
+  ["They may be checked again at the gate.", "登机口要二次核验"],
+  ["Keep power banks, ID and valuables in hand luggage", "充电宝、证件、贵重一律随身，充电宝绝不上托运"],
+  ["Check the airline's rules for batteries before checking a bag.", "托运充电宝违规，查到整箱开箱"],
+  ["Check cabin-liquid limits before checking your bag", "随身液体每瓶 ≤100ml，超的现在塞托运箱"],
+  ["Check the airport's rules before security.", "安检口扔东西最亏"],
+  ["Check the boarding gate and its closing time", "登机口关闭前 15 分钟必须到（国内）"],
+  ["Arrive before the gate closes.", "晚 1 分钟机票作废"],
+  ["Use the restroom before takeoff and landing", "起降前先上洗手间"],
+  ["Stay seated during taxi, takeoff and landing.", "滑行和起降不让去"],
+  ["During the flight", "飞行中"],
+  ["Safety and comfort checks", "安全与舒适各两件事"],
+  ["Keep your seat belt fastened while seated", "全程系安全带"],
+  ["Turbulence can occur unexpectedly.", "晴空颠簸不打招呼，伤都发生在解开的瞬间"],
+  ["For takeoff and landing, follow crew instructions for seats, window shades and tray tables", "起降：椅背调直、遮光板打开、小桌板收起"],
+  ["Keep your exit route clear.", "撤离速度的硬要求"],
+  ["For ear discomfort, try swallowing or yawning", "耳压不适：吞咽、打哈欠或捏鼻鼓气"],
+  ["On long flights, drink water and move when it is safe", "长途每 2 小时起身走动 + 多喝水"],
+  ["Long periods seated can affect circulation.", "久坐是深静脉血栓主因"],
+  ["Before leaving the aircraft", "下飞机前 1 分钟"],
+  ["Collect your belongings and check your connection", "别落东西，转机别慌"],
+  ["Check the seat pockets and floor", "回头看座位口袋、前方口袋、脚下"],
+  ["Look for headphones, travel documents and other small items.", "耳机、护照是航班遗失物前两名"],
+  ["Unplug and pack your power bank", "充电宝别插在座椅 USB 上就走"],
+  ["Photograph the baggage tag or carousel number", "行李票 / 转盘号拍一张"],
+  ["Keep the details to help trace delayed bags.", "丢行李与转机的唯一凭据"],
+  ["For short connections, ask ground staff for directions", "转机衔接不足 90 分钟直接找地服"],
+  ["🍳 Cooking", "🍳 烹饪"],
+  ["Cook noodles", "煮面"],
+  ["Follow the steps and use the timer", "跟时间线走，到点叫你"],
+  ["Instant noodles", "方便面"],
+  ["Boil water", "烧水"],
+  ["Cover the pot to bring the water to a boil.", "大火全开，盖盖更快"],
+  ["Add the noodles and seasoning", "下面饼 + 调料包"],
+  ["Wait for the water to boil before adding the noodles.", "水全沸再下，面汤不浑"],
+  ["Stir during cooking to prevent sticking", "中途搅一次防粘"],
+  ["Turn off the heat and serve", "关火出锅"],
+  ["Check that the flame is out.", "看一眼火苗确实熄灭"],
+  ["Dried noodles", "挂面"],
+  ["Add the noodles and a pinch of salt to boiling water", "水开下面 + 一撮盐"],
+  ["Stir to separate the noodles.", "防粘，入底味"],
+  ["Add a little cold water during cooking", "中途点一次冷水不糊"],
+  ["Cover off the heat for 30 seconds", "关火焖 30 秒"],
+  ["Residual heat finishes cooking the noodles.", "余温焖透面芯"],
+  ["Serve", "出锅"],
+  ["Thin noodles", "龙须面"],
+  ["Add the noodles", "下面"],
+  ["Cook for 90 seconds", "煮 90 秒"],
+  ["Check thin noodles early to avoid overcooking.", "细面易熟，宁欠勿过"],
+  ["Wash dishes", "洗碗"],
+  ["Wash lightly soiled items first and wipe the counter at the end", "先净后污，收尾擦台"],
+  ["By hand", "手洗"],
+  ["Scrape food scraps into the bin", "残渣刮进垃圾桶"],
+  ["Keep solid scraps out of the drain.", "冲不下去的别硬冲"],
+  ["Soak greasy pots and bowls in hot water", "重油锅碗先泡热水"],
+  ["Wipe the counter while they soak.", "泡着的 5 分钟正好擦台面"],
+  ["Start with glasses, chopsticks and spoons", "轻油先洗：杯筷勺"],
+  ["Wash cleaner items first to keep the water clear.", "先净后污，水不脏"],
+  ["Wash greasy dishes and pots with hot water and detergent", "重油：盘碗锅，热水+洗洁精"],
+  ["Rinse away the suds and place items on the draining rack", "冲净泡沫，沥水架归位"],
+  ["Wipe the counter, wring out the cloth and hang it to dry", "收尾：台面抹一遍，抹布拧干挂起"],
+  ["Leave the counter ready for the next meal.", "明天开工不堵心"],
+  ["Dishwasher", "洗碗机"],
+  ["Scrape off large scraps", "大残渣刮净"],
+  ["Check the machine instructions for pre-rinsing.", "现代洗碗机不需要预冲洗"],
+  ["Place pots and plates in the lower rack and cups and utensils above", "装篮：下篮锅盘朝下朝内，上篮杯筷"],
+  ["Angle open sides towards the spray.", "朝下才冲得到"],
+  ["Check salt and rinse-aid levels", "查盐 / 亮碟剂余量"],
+  ["Top them up as needed.", "低了就补，洗不净多半是它"],
+  ["Select a cycle and start", "选程序并启动"],
+  ["Use an intensive cycle for greasy cookware or a delay for off-peak power.", "重油用强力，错峰用预约"],
+  ["Cycle running · keep the door closed", "运行中——别开它"],
+  ["The timer reminds you to unload. Remaining time appears on the home screen.", "到点响铃提醒取出；中途离开会挂起，首页能看剩余"],
+  ["When finished, open the door to let dishes dry", "结束：开门敞晾"],
+  ["Let residual heat dry the dishes.", "余温烘干，比擦干卫生"],
+  ["Unload and check the filter weekly", "取碗 + 清滤网（每周）"],
+  ["Clean the filter to keep the wash effective.", "滤网堵了等于白洗"],
+  ["Deposit dispute", "押金被乱扣"],
+  ["Ask for an itemized written explanation of the amount and the relevant terms before signing.", "当场不签字、不争吵，要求对方出具书面扣款依据（项目+金额+依据条款）"],
+  ["Open the relevant vehicle pickup, hotel check-in or checkout photos in Memo.", "打开 Memo 档案，调出对应的提车/入住/退房凭证照片"],
+  ["Use the booking service's dispute process and attach your evidence. In mainland China, 12315 or the local 12345 service may also assist.", "平台订单页发起申诉，上传凭证；住宿类可同时打 12315 或当地 12345"],
+  ["Save copies of communications and keep original photos.", "全程沟通记录截图存档，别删任何原始照片"],
+  ["Lost property", "东西落下了"],
+  ["Recall where you last saw the item, such as a car or hotel room.", "先回想最后见到物品的场景（车/房间）"],
+  ["Taxi: open the trip receipt and contact the driver or platform. Look in your Memo records.", "打车：打开平台行程单 → 联系司机或平台挂失；行程单在 Memo 档案里"],
+  ["Bus: note the route and plate or fleet number. Contact the operator's lost-property service; 12345 may help in mainland China.", "公交：记下线路+车牌（Memo 凭证里有照片）→ 打车队电话或 12345 公交失物登记"],
+  ["Hotel: contact reception and then the booking service. Describe the item's location.", "酒店：先打前台，再查订单平台客服；描述柜位可加快查找"],
+  ["For lost identity documents, contact the issuing authority promptly.", "贵重证件丢失：同步挂失补办，别等"],
+  ["Vehicle damage dispute", "车损争议"],
+  ["Compare timestamped pickup and return photos in Memo.", "对比 Memo 里提车/还车两组带时间的照片"],
+  ["Request the original inspection form bearing your signature.", "要求对方出示你签字的验车单原件"],
+  ["Ask for disputed settlement charges to be reviewed in writing before signing.", "不认可的扣款别签结算，书面提出异议"],
+  ["Keep communications and use the platform complaint process. In mainland China, 12315 may assist.", "平台投诉无效时 12315，保留所有沟通记录"],
+  ["Personal safety", "人身安全"],
+  ["In an emergency, call the local emergency service. In mainland China, call 110 for police or 120 for an ambulance.", "紧急情况先打 110 / 120，工具放一边"],
+  ["Move to a well-lit public place and let someone you trust know your location.", "换到人多明亮的位置，告知亲友实时位置"],
+  ["Save booking and vehicle details for the police.", "保存好订单与车牌信息交给警方"],
+  ["Use your Memo records to reconstruct the timeline afterwards.", "事后用 Memo 档案整理时间线备查"],
+  ["Hotel stays", "住店"],
+  ["🏠 Renting", "🏠 租房"],
+  ["Renting", "租房"],
+  ["🛡️ Consumer rights", "🛡️ 维权"],
+  ["Consumer rights", "维权"],
+  ["Car rental", "租车"],
+  ["Taxi", "打车"],
+  ["Bus", "公交"],
+  ["Flights", "飞机"],
+  ["Cooking", "烹饪"],
+  ["Travel", "出行"],
+].map(([english, chinese]) => [chinese, english]));
+const builtIn = value => memoLanguage === 'en' ? memoBuiltIns.get(value) ?? value : value;
+const flowTitle = value => value.split(' · ').map(builtIn).join(' · ');
+window.switchMemoLanguage = () => {
+  memoLanguage = memoLanguage === 'en' ? 'zh' : 'en';
+  document.documentElement.lang = memoLanguage === 'zh' ? 'zh-CN' : 'en';
+  try {
+    localStorage.setItem('memo.locale', memoLanguage);
+    if (location.pathname.startsWith('/apps/memo/')) {
+      localStorage.setItem('praxis.locale', memoLanguage);
+      document.cookie = 'praxis_locale=' + memoLanguage + '; Path=/; SameSite=Lax; Max-Age=31536000' + (location.protocol === 'https:' ? '; Secure' : '');
+    }
+  } catch { /* The choice remains effective for this page. */ }
+  route();
+};
+
+const $=s=>document.querySelector(s);
+const hd=$("#hd"),main=$("#main"),extra=$("#extra"),snap=$("#snap");
+const LS_REC="memo.records.v1",LS_PREF="memo.prefs.v1";
+let recordsContext;
+async function recordsRequest(operation,input,expectedRevision,idempotencyKey){
+ if(!recordsContext){
+  const config=await guideApi(new URL("api/config",new URL("./",location.href)));
+  if(config.managed){
+   const session=await guideApi("/auth/session"),catalog=await guideApi("/api/business/catalog");
+   const requested=new URLSearchParams(location.search).get("memoSpace");
+   const spaces=(catalog.spaces||[]).filter(space=>space.apps?.some(app=>app.id==="memo"&&app.actions?.includes("read")));
+   const space=requested?spaces.find(space=>space.id===requested):spaces[0];
+   if(!space)throw Object.assign(new Error("Memo access is unavailable."),{status:403});
+   recordsContext={managed:true,spaceId:space.id,csrfToken:session.csrfToken||""};
+  }else recordsContext={managed:false,spaceId:config.spaces[0].id};
+ }
+ const body={operation,spaceId:recordsContext.spaceId,resourceId:"records",...(input?{input}:{}),...(expectedRevision!==undefined?{expectedRevision,idempotencyKey}:{})};
+ if(recordsContext.managed)return guideApi("/api/business/memo-records",{method:"POST",headers:{"Content-Type":"application/json","X-CSRF-Token":recordsContext.csrfToken},body:JSON.stringify({appId:"memo",...body})});
+ const url=new URL("api/records",new URL("./",location.href));
+ return operation==="read_records"?guideApi(url):guideApi(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+}
+const recordStore=createMemoRecordsClient({request:recordsRequest,storage:localStorage,
+ validate:records=>MemoBackup.parse(JSON.stringify({format:"memo-backup",schemaVersion:1,appVersion:MemoBackup.version,exportedAt:new Date().toISOString(),data:{records,prefs:{},flow:null}}),FLOWS),
+ onError:error=>{if(error.status===401)recordsContext=null;toast(error.code==="IMPORT_CONFLICT"?memoText("Import conflict. The pending local records are preserved.", "档案导入存在冲突，本机记录已保留"):error.status===403?memoText("Record access is unavailable. Your pending local records are preserved.", "暂无档案访问权限；本机待导入记录已保留"):memoText("Could not save the records. Check your connection and retry. Pending local records are preserved.", "档案暂未保存，请检查连接后重试；本机待导入记录已保留"))}});
+const getRecs=()=>recordStore.get();
+const getPref=k=>{try{return JSON.parse(localStorage.getItem(LS_PREF)||"{}")[k]}catch(e){return null}};
+const setPref=(k,v)=>{try{const p=JSON.parse(localStorage.getItem(LS_PREF)||"{}");p[k]=v;localStorage.setItem(LS_PREF,JSON.stringify(p))}catch(e){}};
+const isWeChat=/MicroMessenger/i.test(navigator.userAgent);
+const isStandalone=window.navigator.standalone===true||window.matchMedia("(display-mode: standalone)").matches;
+const fmt=ts=>{const d=new Date(ts),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`};
+let toastTimer;
+function toast(msg){let t=$(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=msg;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.remove(),2600)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function nav(h){
+ if(location.hash===h)return;
+ history.pushState({memoInternal:true},"",h);
+ route();
+}
+let guideRequest=null,guideGeneration=0;
+function guideIdFromRoute(value){try{return decodeURIComponent(value)}catch{return ""}}
+function route(){guideRequest?.abort();guideRequest=null;guideGeneration++;const h=location.hash||"#/";const parts=h.slice(2).split("/");const p=parts[0]||"";
+ if(p!=="f"){clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();setTitle(memoText("Memo", "Memo · 万事如意"))}
+ if(p==="")renderHome();else if(p==="t")renderTop(parts[1]);else if(p==="s")renderCat(parts[1]);else if(p==="g")renderGuideTopic(parts[1],parts[2]&&guideIdFromRoute(parts[2]));else if(p==="c")renderCard(parts[1]);else if(p==="f")renderFlow(parts[1]);else if(p==="r")parts[1]?renderRecord(parts[1]):renderRecords();else if(p==="backup")renderBackup();else if(p==="sos")parts[1]?renderSos(parts[1]):renderSosHome();else renderHome();window.scrollTo(0,0)}
+function header(title,back,sub){hd.innerHTML=(back?`<button class="back" type="button" aria-label="${history.state?.memoInternal?memoText("Back", "返回上一页"):memoText("Home", "返回首页")}" onclick="backInMemo()">‹</button>`:"")+`<span>${esc(title)}</span><span style="flex:1"></span>`+(sub?`<span class="sub">${esc(sub)}</span>`:"")+(!back?'<button type="button" class="locale" onclick="switchMemoLanguage()">'+memoText("简体中文","English")+'</button>':"")+(isStandalone?`<button class="ref" title="${memoText("Refresh", "刷新")}" onclick="doRefresh(event)">⟳</button>`:"")}
+document.addEventListener("DOMContentLoaded",()=>{if("serviceWorker" in navigator&&location.protocol==="https:"){
+ let reloaded=false;
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{if(reloaded)return;reloaded=true;location.reload()});
+ navigator.serviceWorker.register("./sw.js").then(r=>{r.update().catch(()=>{})}).catch(()=>{});
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage("update")});}});
+function banner(){return isWeChat?`<div class="banner warn">${memoText("ⓘ Some features are limited in WeChat. Use its menu to open this page in a browser.", "ⓘ 微信内打开功能受限：点右上角 ··· 选择「在浏览器中打开」体验完整功能")}</div>`:""}
+window.doRefresh=e=>{const b=e.currentTarget;b.classList.add("spin");setTimeout(()=>location.reload(),460)};
+const CATS=[{id:"hotel",label:"🏨 住店",name:"住店"},{id:"rental",label:"🏠 租房",name:"租房",guide:true},{id:"rights",label:"🛡️ 维权",name:"维权",guide:true},{id:"car",label:"🚗 租车",name:"租车"},{id:"taxi",label:"🚕 打车",name:"打车"},{id:"bus",label:"🚌 公交",name:"公交"},{id:"air",label:"✈️ 飞机",name:"飞机"},{id:"cook",label:"🍳 烹饪",name:"烹饪"}];
+const TOPS=[{id:"travel",em:"🧳",name:"出行",cats:["hotel","rental","car","taxi","bus","air"]},{id:"cook",em:"🍳",name:"烹饪",cats:["cook"]},{id:"rights",em:"🛡️",name:"维权",cats:["rights"]}];
+const LS_FLOW="memo.flow.v1";
+const getFlow=()=>{try{const f=JSON.parse(localStorage.getItem(LS_FLOW)||"null");if(f&&f.run===undefined)f.run=!!f.endTs;return f}catch(e){return null}};
+const setFlow=f=>{try{f?localStorage.setItem(LS_FLOW,JSON.stringify(f)):localStorage.removeItem(LS_FLOW)}catch(e){}};
+let pendingBackup=null,backupSelection=0;
+function backupMessage(message){const el=$("#backup-status");if(el)el.textContent=message}
+function renderBackup(){
+ pendingBackup=null;backupSelection++;header(memoText("Backup and restore", "备份与恢复"),true);
+ main.innerHTML=`<div class="card"><h2>${memoText("Export a full backup", "导出完整备份")}</h2><div class="sub2">${memoText("Save your records, keepsakes, photos, preferences and unfinished routines.", "保存全部凭证、留念、照片、偏好和未完成流程。")}</div><button class="btn primary" style="width:100%" onclick="exportMemoBackup()">${memoText("Download backup", "下载备份文件")}</button></div>
+ <div class="card"><h2>${memoText("Restore a backup", "恢复备份")}</h2><div class="sub2">${memoText("Export a backup before replacing records, preferences and routines. Resume any restored timers manually.", "将替换档案、偏好和流程，请先导出备份。恢复后的计时需要手动继续。")}</div><input type="file" id="backup-file" accept="application/json,.json" hidden onchange="selectMemoBackup(event)"><button class="btn ghost" style="width:100%" onclick="document.getElementById('backup-file').click()">${memoText("Choose backup file", "选择备份文件")}</button><div id="backup-preview"></div></div>
+ <div id="backup-status" class="sub2" role="status" aria-live="polite"></div><div class="privacy">${memoText("Files are processed on this device. Store backups securely because they include private photos.", "文件仅在本机处理。备份包含私人照片，请妥善保存。")}</div>`;
+ extra.innerHTML="";
+}
+window.exportMemoBackup=async()=>{
+ try{
+  if(!recordStore.ready&&!await recordStore.start())throw new Error("Records are unavailable.");
+  const backupStorage={getItem:key=>key===LS_REC?JSON.stringify(getRecs()):localStorage.getItem(key)};
+  const source=MemoBackup.encode(backupStorage,FLOWS),url=URL.createObjectURL(new Blob([source],{type:"application/json"}));
+  const link=document.createElement("a");link.href=url;link.download="memo-backup-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  backupMessage(memoText("Backup created. Save the downloaded file.", "备份已生成，请保存下载的文件。"));
+ }catch(error){backupMessage(memoText("Could not export. Check that storage and records are accessible.", "无法导出备份，请检查本机存储和档案是否完整。"))}
+};
+window.selectMemoBackup=async event=>{
+ pendingBackup=null;const selection=++backupSelection,preview=$("#backup-preview");if(preview)preview.innerHTML="";
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ try{
+  if(file.size>MemoBackup.maxBytes){backupMessage(memoText("Choose a Memo backup of 10 MiB or less.", "文件过大，请选择 10 MiB 以内的 Memo 备份。"));return}
+  const backup=MemoBackup.parse(await file.text(),FLOWS);
+  if(selection!==backupSelection||location.hash!=="#/backup")return;
+  pendingBackup=backup;
+  const photos=backup.data.records.reduce((sum,record)=>sum+record.items.filter(item=>item.photo).length,0);
+  preview.innerHTML=`<div class="meta" style="margin-top:14px">${esc(fmt(Date.parse(backup.exportedAt)))} · ${backup.data.records.length}${memoText(" records · ", " 条记录 · ")}${photos}${memoText(" photos", " 张照片")}</div><button class="btn primary" style="width:100%" onclick="importMemoBackup()">${memoText("Import and replace data", "导入并替换数据")}</button>`;
+  backupMessage(memoText("Backup validated. Confirm to replace the current data.", "备份校验通过，确认后才会替换数据。"));
+ }catch(error){if(selection===backupSelection)backupMessage(memoText("Backup could not be read or is invalid. Your data is unchanged.", "备份无法读取或内容无效，本机数据未改变。"))}
+};
+window.importMemoBackup=async()=>{
+ if(!pendingBackup)return;
+ try{
+  const restored=new Map();
+  const staged={getItem:key=>localStorage.getItem(key),setItem:(key,value)=>restored.set(key,value),removeItem:key=>restored.set(key,null)};
+  MemoBackup.restore(staged,pendingBackup,FLOWS);
+  const previous=[LS_PREF,LS_FLOW].map(key=>[key,localStorage.getItem(key)]);
+  const rollback=()=>{for(const [key,value] of previous)value===null?localStorage.removeItem(key):localStorage.setItem(key,value)};
+  try{
+   for(const [key,value] of restored)if(key!==LS_REC)value===null?localStorage.removeItem(key):localStorage.setItem(key,value);
+   if(!await recordStore.replace(pendingBackup.data.records)){rollback();return}
+  }catch(error){try{rollback()}catch(rollbackError){error.code="ROLLBACK"}throw error}
+  clearInterval(flowTimer);flowTimer=null;stopRing();unlockScreen();FS=null;FV=null;FEXP=false;curVid=null;curCard=null;curState=null;pendingBackup=null;
+  toast(memoText("Backup restored. Resume timers manually.", "备份已恢复，计时需手动继续"));nav("#/r");
+ }catch(error){backupMessage(error.code==="ROLLBACK"?memoText("Browser storage is unavailable. Keep the backup and check browser storage settings.", "浏览器存储不可用，请保留备份文件后检查浏览器存储。"):memoText("Restore failed. Your original local data is preserved. Check available space and retry.", "恢复失败，本机原有数据已保留。请检查存储空间后重试。"))}
+};
+let FS=null,FV=null,FEXP=false,flowTimer=null,ringTimer=null,wakeLock=null,audioCtx=null,curVid=null,openVid=null,lastFlow=null;
+const mmss=s=>{s=Math.max(0,s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<3;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=880;g.gain.value=.18;const t=audioCtx.currentTime+i*.45;o.start(t);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.stop(t+.4)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
+function startRing(){if(ringTimer)return;beep();ringTimer=setInterval(beep,2000)}
+function stopRing(){clearInterval(ringTimer);ringTimer=null}
+function lockScreen(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>wakeLock=l).catch(()=>{})}catch(e){}}
+function unlockScreen(){try{wakeLock&&wakeLock.release();wakeLock=null}catch(e){}}
+function setTitle(t){document.title=t}
+function sceneTitle(id){const s=SCENES.find(x=>x.id===id);if(s)return builtIn(s.title);
+ const m=/^flow-(.+?)-(.+)$/.exec(id);if(m){const fl=FLOWS.find(x=>x.id===m[1]);const v=fl&&fl.variants.find(v=>v.id===m[2]);if(fl)return builtIn(fl.title)+" · "+(v?builtIn(v.name):"")}
+ return id}
+function renderHome(){header("Memo","",memoText("Everyday checklists", "万事如意"));
+ const recs=getRecs();const f=getFlow();let fb="";
+ if(f){const fl=FLOWS.find(x=>x.id===f.fid);const v=fl&&fl.variants.find(v=>v.id===f.vid);let rem="";
+  if(f.paused)rem=memoText("Paused", "已暂停");else if(f.endTs){const s=Math.round((f.endTs-Date.now())/1000);rem=s>0?memoText("Remaining: ", "剩 ")+mmss(s):(Date.now()-f.endTs>18e5?memoText("Overdue", "已超时"):memoText("Time is up", "时间到"))}else rem=memoText("In progress", "进行中");
+  fb=`<a class="banner run" href="#/f/${encodeURIComponent(f.fid)}">🍳 ${fl?builtIn(fl.title):memoText("Routine", "流程")}（${v?builtIn(v.name):""}）${rem}${memoText(" · Continue →", " · 点继续 →")}</a>`}
+ main.innerHTML=banner()+fb+`<div class="grid big">`+TOPS.map(t=>{const n=t.cats.reduce((a,cid)=>{const c=CATS.find(x=>x.id===cid);return a+SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length},0);const hasGuides=t.cats.some(cid=>CATS.find(c=>c.id===cid)?.guide);const sub=hasGuides?(t.cats.length>1?`${t.cats.length}${memoText(" categories", " 类")}`:memoText("Guides", "办事指南")):(t.cats.length>1?`${t.cats.length}${memoText(" categories · ", " 类 · ")}${n}${memoText(" checklists", " 件事")}`:`${n}${memoText(" routines", " 个流程")}`);return `<a class="tile big" href="#/t/${t.id}"><div class="em">${t.em}</div><div class="t">${builtIn(t.name)}</div><div class="s">${sub}</div></a>`}).join("")+"</div>"+
+ `<div class="privacy">${memoText("🔒 Photos and evidence are stored in your private records.", "🔒 照片与凭证保存在你的私有档案中")}</div>`;
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">${memoText("⚠️ Get help", "⚠️ 出事了")}</button><button class="btn primary" onclick="nav('#/r')">${memoText("📁 My records", "📁 我的档案")}${recs.length?`<span class="badge">${recs.length}</span>`:""}</button></div>`}
+window.nav=nav;
+window.backInMemo=()=>{if(history.state?.memoInternal)history.back();else nav("#/")};
+function renderCat(id){const c=CATS.find(x=>x.id===id);if(!c){renderHome();return}if(c.guide){renderGuideTopic(id);return}
+ header(builtIn(c.name),true);
+ const flows=FLOWS.filter(x=>x.cat===c.label),scenes=SCENES.filter(s=>s.cat===c.label);
+ main.innerHTML=`<div class="grid">`+flows.map(x=>`<a class="tile" href="#/f/${x.id}"><div class="em">${x.em}</div><div class="t">${esc(builtIn(x.title))}</div><div class="s">${memoText("⏱ Timed routine · ", "⏱ 定时流程 · ")}${esc(builtIn(x.sub))}</div></a>`).join("")+scenes.map(s=>`<a class="tile" href="#/c/${s.id}"><div class="em">${s.em}</div><div class="t">${esc(builtIn(s.title))}</div><div class="s">${esc(builtIn(s.sub))}</div></a>`).join("")+"</div>";
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">${memoText("⚠️ Get help", "⚠️ 出事了")}</button><button class="btn primary" onclick="nav('#/r')">${memoText("📁 My records", "📁 我的档案")}</button></div>`}
+function guideFooter(){return `<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">${memoText("⚠️ Get help", "⚠️ 出事了")}</button><button class="btn primary" onclick="nav('#/r')">${memoText("📁 My records", "📁 我的档案")}</button></div>`}
+async function guideApi(url,options={}){
+ const response=await fetch(url,{credentials:"same-origin",mode:"same-origin",cache:"no-store",redirect:"error",...options});
+ if(!response.ok){const failure=await response.json().catch(()=>({}));throw Object.assign(new Error("Memo request failed."),{status:response.status,code:failure.code})}
+ return response.json();
+}
+async function loadGuideTopic(topic,signal){
+ const config=await guideApi(new URL("api/config",new URL("./",location.href)),{signal});
+ if(!config.managed)return guideApi(new URL("api/guides?topic="+encodeURIComponent(topic),new URL("./",location.href)),{signal});
+ const session=await guideApi("/auth/session",{signal});
+ const catalog=await guideApi("/api/business/catalog",{signal});
+ const requested=new URLSearchParams(location.search).get("memoSpace");
+ const spaces=(catalog.spaces||[]).filter(space=>space.apps?.some(app=>app.id==="memo"&&app.actions?.includes("read")));
+ const space=requested?spaces.find(space=>space.id===requested):spaces[0];
+ if(!space)throw Object.assign(new Error("Memo access is unavailable."),{status:403});
+ return guideApi("/api/business/invoke",{method:"POST",signal,headers:{"Content-Type":"application/json","X-CSRF-Token":session.csrfToken||""},body:JSON.stringify({appId:"memo",operation:"read_topic",spaceId:space.id,resourceId:topic})});
+}
+function validGuides(value,topic){
+ if(!value||value.topicId!==topic||!Array.isArray(value.guides)||value.guides.length>100)throw new Error("Invalid guide response.");
+ for(const guide of value.guides){
+  if(!guide||typeof guide.id!=="string"||typeof guide.title!=="string"||!Array.isArray(guide.blocks)||guide.blocks.length>100)throw new Error("Invalid guide response.");
+  for(const block of guide.blocks)if(!block||block.heading!==undefined&&typeof block.heading!=="string"||!Array.isArray(block.items)||block.items.length>100||block.items.some(item=>typeof item!=="string"))throw new Error("Invalid guide response.");
+ }
+ return value.guides;
+}
+async function renderGuideTopic(topic,id){
+ const category=CATS.find(item=>item.id===topic&&item.guide);if(!category){renderHome();return}
+ const generation=guideGeneration;guideRequest=new AbortController();const signal=guideRequest.signal;
+ header(builtIn(category.name),true);main.innerHTML=`<div class="empty" role="status">${memoText("Loading…", "正在读取…")}</div>`;extra.innerHTML=guideFooter();
+ try{
+  const guides=validGuides(await loadGuideTopic(topic,signal),topic);if(generation!==guideGeneration)return;
+  if(id){
+   const guide=guides.find(item=>item.id===id);
+   if(!guide){main.innerHTML=`<div class="empty" role="status">${memoText("This guide is unavailable.", "这份指南暂不可用")}</div>`;return}
+   header(guide.title,true);
+   main.innerHTML=`<article class="guide"><h2>${esc(guide.title)}</h2>`+guide.blocks.map(block=>`<section class="card">${block.heading?`<h3>${esc(block.heading)}</h3>`:""}<ul>`+block.items.map(item=>`<li>${esc(item)}</li>`).join("")+"</ul></section>").join("")+"</article>";
+  }else{
+   main.innerHTML=guides.length?'<div class="grid guide-list">'+guides.map(guide=>`<button type="button" class="tile" data-guide-id="${esc(guide.id)}"><div class="em" aria-hidden="true">${category.label.split(" ")[0]}</div><div class="t">${esc(guide.title)}</div></button>`).join("")+"</div>":`<div class="empty" role="status">${memoText("No guides yet.", "暂无指南")}</div>`;
+   main.querySelectorAll("[data-guide-id]").forEach(button=>button.addEventListener("click",()=>nav("#/g/"+topic+"/"+encodeURIComponent(button.dataset.guideId))));
+  }
+ }catch(error){
+  if(generation!==guideGeneration||error.name==="AbortError")return;
+  main.innerHTML=`<div class="empty" role="status">${error.status===401?memoText("Sign in to read the guides.", "请先登录后查看指南"):error.status===403?memoText("You do not have access.", "暂无查看权限"):memoText("Guides could not be loaded.", "指南暂时无法读取")}</div>`;
+  if(![401,403].includes(error.status)){
+   const retry=document.createElement("button");retry.type="button";retry.className="btn ghost";retry.textContent=memoText("Retry loading guides", "重新读取指南");
+   retry.addEventListener("click",()=>renderGuideTopic(topic,id));main.append(retry);
+  }
+ }
+}
+function renderFlow(fid){const fl=FLOWS.find(x=>x.id===fid);if(!fl){renderHome();return}
+ FS=getFlow();if(FS&&FS.fid!==fid)FS=null;
+ if(!FS){if(!curVid){curVid=getPref("fv_"+fid)||fl.variants[0].id}if(!fl.variants.find(v=>v.id===curVid))curVid=fl.variants[0].id;const cv=fl.variants.find(v=>v.id===curVid);
+  header(builtIn(fl.title),true);
+  main.innerHTML=`<div class="seg">`+fl.variants.map(v=>`<button class="segbtn ${v.id===curVid?"on":""}" onclick="pickVid('${v.id}')">${builtIn(v.name)}</button>`).join("")+`</div>
+  <div class="card">`+cv.steps.map((st,i)=>`<div class="step" style="cursor:default"><div class="n">${i+1}</div><div class="txt">${esc(builtIn(st.t))}${st.dur?` · ${mmss(st.dur)}`:""}${st.why?`<div class="why">${esc(builtIn(st.why))}</div>`:""}</div></div>`).join("")+`</div>
+  <button class="btn primary" style="width:100%" onclick="startFlow('${fid}')">${memoText("▶ Start ", "▶ 开始")}${builtIn(fl.title)}</button>\n  <div class="privacy">${memoText("An alarm sounds when time is up. Return to continue an unfinished routine.", "到点响铃 · 中途离开会挂起，回来接着走")}</div>`;
+  extra.innerHTML="";return}
+ renderFlowRun(fl)}
+window.pickVid=id=>{const fid=location.hash.slice(2).split("/")[1];curVid=id;setPref("fv_"+fid,id);renderFlow(fid)};
+function renderFlowRun(fl){const v=fl.variants.find(x=>x.id===FS.vid);const running=FS.run&&FS.endTs;const stale=running&&!FS.paused&&FS.endTs<Date.now()-18e5;
+ const cur=v.steps[FS.idx];const expired=running&&!FS.paused&&Date.now()>=FS.endTs;
+ if(expired)FV=null;
+ const browsing=FV!==null&&FV!==FS.idx;const viewIdx=browsing?FV:FS.idx;
+ header(builtIn(fl.title)+" · "+builtIn(v.name),true);
+ if(expired)startRing();else stopRing();
+ if(FS.run&&!FS.paused&&!expired)lockScreen();else unlockScreen();
+ const remainTxt=!FS.run?memoText("Not started", "未开始"):FS.paused?memoText("Paused", "已暂停"):FS.endTs?mmss(Math.max(0,Math.round((FS.endTs-Date.now())/1000))):memoText("To do", "待完成");
+ const row=(st,i,cls)=>`<div class="fstep ${cls}" id="step-${i}"><div class="fhead"><div class="n">${cls==="done"?"✓":i+1}</div><div class="ft">${esc(builtIn(st.t))}</div><div class="fd">${st.dur?mmss(st.dur):""}</div></div>`;
+ let list="";
+ for(let i=0;i<v.steps.length;i++){const st=v.steps[i];
+  if(i===FS.idx){
+   if(expired){list+=row(st,i,"exp")+`<div class="cd">${memoText("⏰ Time is up", "⏰ 时间到")}</div><div class="meta">${esc(builtIn(st.why)||"　")}</div><button class="btn primary" style="width:100%;margin-top:8px" onclick="ackFlow()">${i>=v.steps.length-1?memoText("✅ Finish", "✅ 完成"):memoText("Continue to next step ▶", "知道了，下一步 ▶")}</button></div>`}
+   else if(!FS.run){list+=row(st,i,"cur")+`<div class="cd idle">${memoText("Not started", "未开始")}</div>`+(st.why?`<div class="meta">${esc(builtIn(st.why))}</div>`:"")+
+    (st.dur?`<button class="btn primary" style="width:100%;margin-top:8px" onclick="startStep()">${memoText("▶ Start this step", "▶ 开始这一步")}</button><button class="btn ghost" style="width:100%;margin-top:8px" onclick="stepDone()">${memoText("⏭ Skip this step", "⏭ 跳过此步")}</button>`:
+     `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">${memoText("✓ Done", "✓ 完成")}</button>`)+`</div>`}
+   else if(FS.paused){list+=row(st,i,"cur")+`<div class="cd paused">${memoText("Paused", "已暂停")}</div>`+(st.why?`<div class="meta">${esc(builtIn(st.why))}</div>`:"")+
+    `<div class="btnrow"><button class="btn primary" onclick="resumeFlow()">${memoText("▶ Resume", "▶ 继续")}</button><button class="btn ghost" onclick="stepDone()">${memoText("✓ Finish early", "✓ 提前完成")}</button></div></div>`}
+   else{list+=row(st,i,"cur")+`<div class="cd" id="cd">${st.dur?"--:--":memoText("In progress", "进行中")}</div>`+(st.why?`<div class="meta">${esc(builtIn(st.why))}</div>`:"")+
+    (st.dur?`<div class="btnrow"><button class="btn ghost" onclick="pauseFlow()">${memoText("⏸ Pause", "⏸ 暂停")}</button><button class="btn ghost" onclick="stepDone()">${memoText("✓ Finish early", "✓ 提前完成")}</button></div>`:
+     `<button class="btn primary" style="width:100%;margin-top:8px" onclick="stepDone()">${memoText("✓ Done", "✓ 完成")}</button>`)+`</div>`}}
+  else if(browsing&&i===viewIdx){list+=`<div class="fstep view" id="step-${i}" onclick="backCur()"><div class="fhead"><div class="n">${i+1}</div><div class="ft">${esc(builtIn(st.t))}</div><div class="fd">${memoText("Viewing ×", "查看中 ×")}</div></div><div class="meta">${st.dur?memoText("Suggested: ", "建议 ")+mmss(st.dur)+" · ":""}${esc(builtIn(st.why)||"　")}</div><div class="nowmini">${memoText("⏱ Current step ", "⏱ 当前在第 ")}${FS.idx+1}${memoText(" · ", " 步 · ")}${remainTxt}${memoText(" · Return to current step", " — 点此回到当前")}</div></div>`}
+  else{list+=row(st,i,i<FS.idx?"done":"fut")+`</div>`}}
+ main.innerHTML=(stale?`<div class="banner warn">${memoText("This routine has been idle for a while. You can restart it.", "上次进行到一半，时间过得有点久，建议重走")}<button onclick="resetFlow()">${memoText("Restart", "重走")}</button></div>`:"")+
+ `<div class="flist">`+list+`</div>
+ <div class="grid3" style="margin-top:12px"><button class="btn ghost" onclick="navPrev()" ${viewIdx===0?"disabled style='opacity:.4'":""}>${memoText("◀ Previous step", "◀ 上一步")}</button><button class="btn ghost" onclick="${browsing?"backCur()":"noop()"}" style="${browsing?"":"opacity:.55;pointer-events:none"}">${browsing?memoText("Return to current", "回到当前"):memoText("📍 Current", "📍 当前")}</button><button class="btn ghost" onclick="navNext()" ${viewIdx>=v.steps.length-1?"disabled style='opacity:.4'":""}>${memoText("Next step ▶", "下一步 ▶")}</button></div>\n <button class="btn ghost" style="width:100%;margin-top:10px" onclick="abortFlow()">${memoText("Discard routine", "放弃本次")}</button>`;
+ extra.innerHTML="";clearInterval(flowTimer);flowTimer=setInterval(tick,500);tick();
+ const ex=document.getElementById("step-"+viewIdx);ex&&ex.scrollIntoView({block:"nearest",behavior:"smooth"})}
+function renderTop(tid){const t=TOPS.find(x=>x.id===tid);if(!t){renderHome();return}
+ if(t.cats.length===1){renderCat(t.cats[0]);return}
+ header(builtIn(t.name),true);
+ main.innerHTML=`<div class="grid big">`+t.cats.map(cid=>{const c=CATS.find(x=>x.id===cid);const n=SCENES.filter(s=>s.cat===c.label).length+FLOWS.filter(x=>x.cat===c.label).length;return `<a class="tile big" href="#/s/${cid}"><div class="em">${c.label.split(" ")[0]}</div><div class="t">${builtIn(c.name)}</div><div class="s">${c.guide?memoText("Guides", "办事指南"):`${n}${memoText(" checklists", " 件事")}`}</div></a>`}).join("")+"</div>";
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/sos')">${memoText("⚠️ Get help", "⚠️ 出事了")}</button><button class="btn primary" onclick="nav('#/r')">${memoText("📁 My records", "📁 我的档案")}</button></div>`}
+window.noop=()=>{};
+window.navTo=i=>{if(!FS)return;FV=i===FS.idx?null:i;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navPrev=()=>{if(!FS)return;const n=Math.max(0,(FV===null?FS.idx:FV)-1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.navNext=()=>{if(!FS)return;const v=FLOWS.find(x=>x.id===FS.fid).variants.find(x=>x.id===FS.vid);const n=Math.min(v.steps.length-1,(FV===null?FS.idx:FV)+1);FV=n===FS.idx?null:n;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.backCur=()=>{FV=null;renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.ackFlow=()=>{if(!FS)return;stopRing();stepDone()};
+window.startStep=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const st=v.steps[FS.idx];
+ FS.run=true;FS.paused=false;FS.remain=0;FS.endTs=st.dur>0?Date.now()+st.dur*1000:null;FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
+window.startFlow=fid=>{const fl=FLOWS.find(x=>x.id===fid);const v=fl.variants.find(x=>x.id===curVid);
+ if(getFlow()&&!confirm(memoText("Discard the previous unfinished routine?", "放弃上一次未完成的流程？")))return;
+ FS={fid:fid,vid:v.id,idx:0,run:false,endTs:null,paused:false,remain:0,startedTs:Date.now()};
+ FV=null;FEXP=false;setFlow(FS);renderFlowRun(fl)};
+window.pickVid=id=>{const fid=location.hash.slice(2).split("/")[1];curVid=id;setPref("fv_"+fid,id);renderFlow(fid)};
+window.pauseFlow=()=>{if(!FS||!FS.endTs)return;FS.paused=true;FS.remain=Math.max(0,Math.round((FS.endTs-Date.now())/1000));setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.resumeFlow=()=>{if(!FS)return;FS.paused=false;FS.endTs=Date.now()+FS.remain*1000;setFlow(FS);renderFlowRun(FLOWS.find(x=>x.id===FS.fid))};
+window.resetFlow=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);FS.idx=0;stopRing();FV=null;FEXP=false;FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
+window.abortFlow=()=>{if(!confirm(memoText("Discard this routine?", "确定放弃？")))return;FS=null;setFlow(null);clearInterval(flowTimer);stopRing();unlockScreen();setTitle(memoText("Memo", "Memo · 万事如意"));nav("#/")};
+window.stepDone=()=>{if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);
+ lastFlow={title:fl.title+" · "+v.name,ts:FS.startedTs,items:v.steps.map((st,i)=>({t:st.t,done:i<=FS.idx,photo:null}))};
+ FS.idx++;stopRing();FV=null;FEXP=false;if(FS.idx>=v.steps.length){finishFlow();return}
+ FS.run=false;FS.paused=false;FS.endTs=null;FS.remain=0;setFlow(FS);renderFlowRun(fl)};
+function finishFlow(){clearInterval(flowTimer);stopRing();unlockScreen();setTitle(memoText("Memo", "Memo · 万事如意"));setFlow(null);
+ const fl=FLOWS.find(x=>x.id===lastFlow.fid);const proof=fl&&fl.ev;
+ header(memoText("Complete ✅", "完成 ✅"),true);
+ main.innerHTML=`<div class="card" style="text-align:center;padding:30px 14px"><div style="font-size:40px">🍜</div><h2>${esc(flowTitle(lastFlow.title))}${memoText(" complete", " 完成")}</h2><div class="meta">${fmt(lastFlow.ts)}${memoText(" · Started · ", " 开始 · 共 ")}${lastFlow.items.length}${memoText(" steps", " 步")}</div></div>\n ${proof?`<button class="btn primary" style="width:100%" onclick="saveFlowRec()">${memoText("🛡 Save evidence", "🛡 存为凭证")}</button>`:`<button class="btn primary" style="width:100%" onclick="flowShot()">${memoText("📸 Take a keepsake photo", "📸 拍照留念")}</button>`}\n <button class="btn ghost" style="width:100%;margin-top:10px" onclick="nav('#/')">${memoText("Back to home", "不用了，回首页")}</button>`;
+ extra.innerHTML=""}
+window.flowShot=()=>{snap.value="";snap.onchange=async()=>{const f=snap.files&&snap.files[0];if(!f)return;
+ try{const url=await watermark(f,lastFlow.title);
+ const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),kind:"memo",ts:Date.now(),items:[{t:"留念",done:true,photo:url}]};
+ if(await recordStore.put(rec))nav("#/r/"+rec.id)}catch(e){toast(memoText("Could not read the photo. Take another photo.", "照片读取失败，请重拍"))}};snap.click()};
+window.saveFlowRec=async()=>{const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:"flow-"+lastFlow.title.replace(/ · /,"-"),ts:lastFlow.ts,items:lastFlow.items};
+ if(await recordStore.put(rec))nav("#/r/"+rec.id)};
+function tick(){if(!FS)return;const fl=FLOWS.find(x=>x.id===FS.fid);const v=fl.variants.find(x=>x.id===FS.vid);const cur=v.steps[FS.idx];
+ if(FS.paused){setTitle(memoText("⏸ Paused · ", "⏸ 已暂停 · ")+fl.title);return}
+ if(!FS.run){setTitle(builtIn(cur.t)+memoText(" (not started) · ", "（未开始） · ")+fl.title);return}
+ if(FS.endTs){const s=Math.round((FS.endTs-Date.now())/1000);
+  if(s<=0){setTitle(memoText("⏰ Time is up · ", "⏰ 时间到 · ")+fl.title);if($("#cd"))renderFlowRun(fl);return}
+  setTitle(mmss(s)+" · "+builtIn(cur.t)+" | Memo");const el=$("#cd");if(el)el.textContent=mmss(s)}
+ else setTitle(builtIn(cur.t)+" · "+builtIn(fl.title))}
+let curCard=null,curState=null;
+function renderCard(id){const s=SCENES.find(x=>x.id===id);if(!s){renderHome();return}
+ curCard=s;curState=s.items.map(i=>({done:false,photo:null}));
+ header(builtIn(s.title),true,builtIn(s.cat));
+ main.innerHTML=`<div class="sub2">${esc(builtIn(s.sub))}</div><div class="card">${s.items.map((it,i)=>`<div class="item" id="it${i}"><label class="check-row"><input type="checkbox" onchange="toggleItem(${i},this.checked)"><span class="txt">${esc(builtIn(it.t))}${it.why?`<span class="why">ⓘ ${esc(builtIn(it.why))}</span>`:""}</span></label>${it.ph?`<button class="cam" aria-label="${memoText("Take photo: ", "拍照：")}${esc(builtIn(it.t))}" onclick="snapPhoto(${i})">${memoText("📷 Take photo", "📷 拍照")}</button>`:""}</div>`).join("")}</div>\n <button class="btn primary" style="width:100%" onclick="finishCard()">${memoText("✅ Create record", "✅ 生成凭证")}</button>\n <div class="privacy">${memoText("Leaving before completion discards this checklist.", "中途回返不会保存任何内容")}</div>`;
+ extra.innerHTML=""}
+window.toggleItem=(i,checked)=>{curState[i].done=checked;$("#it"+i).classList.toggle("done",checked)};
+window.snapPhoto=i=>{snap.value="";snap.onchange=async()=>{const f=snap.files&&snap.files[0];if(!f)return;try{const url=await watermark(f,curCard.title);curState[i].photo=url;const old=$("#th"+i);if(old)old.remove();const img=document.createElement("img");img.src=url;img.className="thumb";img.id="th"+i;$("#it"+i).appendChild(img)}catch(e){toast(memoText("Could not read the photo. Take another photo.", "照片读取失败，请重拍"))}};snap.click()};
+async function watermark(file,label){label=label||(curCard?curCard.title:"Memo");
+const dataUrl=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
+ const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=dataUrl});
+ const max=1280,sc=Math.min(1,max/Math.max(img.width,img.height));
+ const c=document.createElement("canvas");c.width=img.width*sc;c.height=img.height*sc;
+ const x=c.getContext("2d");x.drawImage(img,0,0,c.width,c.height);
+ const line=Math.max(12,Math.round(c.width/34));x.font=`600 ${line}px sans-serif`;
+ label=`Memo · ${label} · ${fmt(Date.now())}`;
+ const w=x.measureText(label).width;x.fillStyle="rgba(0,0,0,.55)";x.fillRect(8,c.height-line*2.2,w+line,line*1.6);
+ x.fillStyle="#fff";x.textBaseline="middle";x.fillText(label,8+line/2,c.height-line*2.2+line*0.8);
+ return c.toDataURL("image/jpeg",0.6)}
+window.finishCard=async()=>{const done=curState.filter(i=>i.done).length;if(!done){toast(memoText("Check at least one item to create a record.", "至少勾选一项再生成凭证"));return}
+ const rec={id:"r"+Date.now()+"x"+Math.floor(Math.random()*1000),sceneId:curCard.id,ts:Date.now(),items:curCard.items.map((it,i)=>({t:it.t,done:curState[i].done,photo:curState[i].photo||null}))};
+ if(await recordStore.put(rec))nav("#/r/"+rec.id)};
+function renderRecords(){header(memoText("My records", "我的档案"),true);
+ const recs=getRecs();
+ main.innerHTML=recs.length?recs.map(r=>{const n=r.items.filter(i=>i.photo).length;
+ return `<a class="rec" href="#/r/${r.id}"><div class="em">${r.kind==="memo"?"🌸":"🛡"}</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${r.kind==="memo"?memoText("Keepsake · ", "留念 · "):""}${fmt(r.ts)}${memoText(" · Photos: ", " · 照片 ")}${n}${memoText(" ", " 张")}</div></div><div style="color:var(--t3)">›</div></a>`}).join(""):`<div class="empty">${memoText("No records yet.", "还没有凭证")}<br>${memoText("Start a checklist from the home screen.", "去首页开始第一张时刻卡吧")}</div><button class="btn primary" style="width:100%" onclick="nav('#/')">${memoText("Go to home", "去首页")}</button>`;
+ extra.innerHTML=`<div class="footbtns"><button class="btn ghost" onclick="nav('#/backup')">${memoText("Backup and restore", "备份与恢复")}</button></div>`}
+function renderRecord(id){const r=getRecs().find(x=>x.id===id);if(!r){renderRecords();return}
+ header(r.kind==="memo"?memoText("Keepsake", "留念"):memoText("Record details", "凭证详情"),true);
+ const photos=r.items.filter(i=>i.photo);
+ main.innerHTML=`<div class="card"><h2>${esc(sceneTitle(r.sceneId))}</h2><div class="meta">${r.kind==="memo"?memoText("🌸 Keepsake · ", "🌸 留念 · "):""}${fmt(r.ts)}</div>
+ ${r.items.map(i=>`<div class="item ${i.done?"done":""}" style="cursor:default"><div class="cb">${i.done?"✓":""}</div><div class="txt">${esc(i.t)}${i.photo?`<div class="why">${memoText("📷 Photo attached", "📷 已留证")}</div>`:""}</div></div>`).join("")}</div>
+ ${photos.length?`<div class="card"><div class="meta">${memoText("Timestamped photos", "照片（带时间水印）")}</div><div class="photogrid">${photos.map((i,index)=>`<button type="button" onclick="lb(this)" aria-label="${memoText("Enlarge photo ", "放大第 ")}${index+1}${memoText(" photos", " 张照片")}"><img src="${i.photo}" alt=""></button>`).join("")}</div></div>`:""}
+ ${r.kind==="memo"?"":`<button class="btn primary" style="width:100%" onclick="copyRec('${r.id}')">${memoText("📋 Copy as text", "📋 复制为文本")}</button>`}
+ <button class="btn ghost" style="width:100%;margin-top:10px" onclick="delRec('${r.id}')">${memoText("🗑 Delete", "🗑 删除")}</button>`;
+ extra.innerHTML=""}
+window.lb=trigger=>{
+ const dialog=document.createElement("dialog");dialog.className="lightbox";dialog.setAttribute("aria-label",memoText("Photo preview", "照片预览"));
+ const close=document.createElement("button");close.type="button";close.textContent=memoText("Close", "关闭");
+ const photo=document.createElement("img");photo.src=trigger.querySelector("img").src;photo.alt=memoText("Enlarged photo", "放大的照片");
+ dialog.append(close,photo);extra.append(dialog);
+ dialog.addEventListener("click",()=>dialog.close());
+ dialog.addEventListener("close",()=>{dialog.remove();if(trigger.isConnected)trigger.focus({preventScroll:true})},{once:true});
+ dialog.showModal();close.focus();
+};
+window.copyRec=id=>{const r=getRecs().find(x=>x.id===id);if(!r)return;
+ const txt=r.kind==="memo"?`${memoText("Memo keepsake\nChecklist: ", "Memo 留念\n场景：")}${sceneTitle(r.sceneId)}${memoText("\nTime: ", "\n时间：")}${fmt(r.ts)}`:`${memoText("Memo record\nChecklist: ", "Memo 凭证\n场景：")}${sceneTitle(r.sceneId)}${memoText("\nTime: ", "\n时间：")}${fmt(r.ts)}${memoText("\nChecklist items:\n", "\n清单：\n")}${r.items.map(i=>(i.done?"✅ ":"☐ ")+i.t).join("\n")}${memoText("\nPhotos: ", "\n照片：")}${r.items.filter(i=>i.photo).length}${memoText(" (timestamped, see records)", " 张（带时间水印，见档案）")}`;
+ const ok=()=>toast(memoText("Copied. Paste the text into a message or complaint.", "已复制，可直接粘贴到申诉/聊天"));
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,()=>fallbackCopy(txt,ok))}else fallbackCopy(txt,ok)};
+function fallbackCopy(txt,ok){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){toast(memoText("Could not copy. You can take a screenshot.", "复制失败，请手动截屏"))}ta.remove()}
+window.delRec=async id=>{if(!confirm(memoText("Permanently delete this record?", "确定删除此凭证？删除后不可恢复")))return;if(await recordStore.remove(id)){toast(memoText("Deleted", "已删除"));nav("#/r")}};
+function renderSosHome(){header(memoText("Get help", "出事了"),true);
+ main.innerHTML=`<div class="emerg">${memoText("🚨 If you are in immediate danger, call local emergency services first. In mainland China, call 110 for police or 120 for an ambulance.", "🚨 人身安全紧急情况：先打 110 / 120，再回来用工具")}</div>`+INCIDENTS.map(x=>`<a class="rec" href="#/sos/${x.id}"><div class="em">${x.em}</div><div style="flex:1"><div class="t">${esc(builtIn(x.t))}</div><div class="m">${x.steps.length}${memoText(" steps", " 步应对")}</div></div><div style="color:var(--t3)">›</div></a>`).join("");
+ extra.innerHTML=""}
+function renderSos(id){const x=INCIDENTS.find(i=>i.id===id);if(!x){renderSosHome();return}
+ header(builtIn(x.t),true);
+ const recs=getRecs().filter(r=>(r.kind||"proof")==="proof"&&x.cat.includes(r.sceneId));
+ main.innerHTML=`<div class="card">${x.steps.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${esc(builtIn(s))}</div></div>`).join("")}</div>
+ ${recs.length?`<div class="cat">${memoText("Related records", "相关凭证")}</div>${recs.map(r=>{return `<a class="rec" href="#/r/${r.id}"><div class="em">📄</div><div style="flex:1"><div class="t">${esc(sceneTitle(r.sceneId))}</div><div class="m">${fmt(r.ts)}</div></div><div style="color:var(--t3)">›</div></a>`}).join("")}`:`<div class="card" style="color:var(--t3);font-size:13px">${memoText("No evidence is saved for this incident. Follow the steps above. For future trips, start a checklist before arriving.", "本次没有留证。按上面步骤走，以后入场时先开一张时刻卡。")}</div>`}`;
+ extra.innerHTML=""}
+document.addEventListener("click",event=>{
+ const link=event.target.closest("a[href^='#/']");
+ if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ event.preventDefault();nav(link.hash);
+});
+window.addEventListener("hashchange",route);
+route();
+function refreshRecordView(){
+ const hash=location.hash;
+ if(!hash||hash==="#/"||hash.startsWith("#/r")||hash.startsWith("#/sos/"))route();
+}
+recordStore.start().then(refreshRecordView);
+window.addEventListener("online",()=>{recordsContext=null;recordStore.start().then(refreshRecordView)});
+</script>
+</body>
+</html>
