@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "memo",
+  "version": "0.5.9",
+  "kind": "app",
+  "name": "Memo",
+  "description": "Checklists and records",
+  "labels": {
+    "en": {
+      "name": "Memo",
+      "description": "Checklists and records"
+    },
+    "zh": {
+      "name": "Memo",
+      "description": "生活清单与凭证"
+    }
+  },
+  "icon": "public/praxis-icon.svg",
+  "iconAliases": [
+    "/memo-icon.svg"
+  ],
+  "path": "/",
+  "port": 4325,
+  "documents": {
+    "prd": {
+      "en": "docs/PRD.en.md",
+      "zh": "docs/Memo_PRD.md"
+    }
+  }
+}
